@@ -11,8 +11,6 @@ import "../accounts"
 
 ScrollablePage {
     id: page
-    width: 800
-    height: 600
 
     function create(manager, protocol) {
         console.log("Create acc", manager, protocol)
@@ -29,7 +27,6 @@ ScrollablePage {
     Column {
         id: internalCol
         width: page.width
-        height: submitButton.height + parametersDetailView.count * 50
 
         Item {
             id: displayNameEditor2
@@ -54,10 +51,11 @@ ScrollablePage {
         Repeater {
             id: parametersDetailView
             model: accountParameterModel
+            readonly property int delegateHeight: 50
 
             delegate: Item {
                 id: delegate
-                height: 50
+                height: parametersDetailView.delegateHeight
                 width: page.width
                 Row {
                     spacing: 4
@@ -150,5 +148,4 @@ ScrollablePage {
             page.createAccount(accountParameterModel.manager, accountParameterModel.protocol, displayNameEditor.text, accountParameterModel.getVariantMap())
         }
     }
-
 }
