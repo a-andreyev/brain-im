@@ -11,4 +11,14 @@ import "accounts"
 
 AccountView {
     id: page
+
+    footer: Button {
+        id: addAccount
+        text: "Add account"
+        onClicked: {
+            stackView.push("accounts/ConnectionManagerView.qml", {
+                               "title": text
+                           })
+        }
+    }
 }

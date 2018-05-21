@@ -43,14 +43,4 @@ ScrollablePage {
             }
         }
     }
-
-    footer: Button {
-        id: addAccount
-        text: "Add account"
-        onClicked: {
-            stackView.push("ConnectionManagerView.qml", {
-                               "title": text
-                           })
-        }
-    }
 }
