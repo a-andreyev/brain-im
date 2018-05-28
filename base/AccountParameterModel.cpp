@@ -1,5 +1,7 @@
 #include "AccountParameterModel.hpp"
 
+#include <TelepathyQt/PendingStringList>
+
 static const int BaseRole = Qt::UserRole + 1;
 
 AccountParameterModel::AccountParameterModel(QObject *parent)
@@ -188,8 +190,15 @@ bool AccountParameterModel::submit()
         return false;
     }
 
-    m_account->updateParameters(m_values, QStringList());
-
+    qDebug() << "Submit:" << getVariantMap();
+    Tp::PendingStringList *submitOperation = m_account->updateParameters(m_values, QStringList());
+    connect(submitOperation, &Tp::PendingStringList::finished, [=](Tp::PendingOperation *operation) {
+        if (operation->isError()) {
+            qWarning() << "AccountParameterModel::submit(): Operation failed:" << operation->errorName() << operation->errorMessage();
+        } else {
+            qDebug() << "AccountParameterModel::submit(): Operation succeeded";
+        }
+    });
     return true;
 }
 
