@@ -128,15 +128,21 @@ bool AccountsModel::setData(int index, AccountsModel::Role role, const QVariant 
 QHash<int, QByteArray> AccountsModel::roleNames() const
 {
     static const QHash<int, QByteArray> extraRoles {
-        { BaseRole + AccountObject,"accountObject" },
-        { BaseRole + DisplayName,  "displayName" },
-        { BaseRole + Enabled,      "enabled" },
-        { BaseRole + CmName,       "cmName" },
-        { BaseRole + ProtocolName, "protocolName" },
-        { BaseRole + ServiceName,  "serviceName" },
-        { BaseRole + UniqueIdentifier,  "uniqueIdentifier" },
+        { BaseRole + AccountObject,
+                    "accountObject" },
+        { BaseRole + DisplayName,
+                    "displayName" },
+        { BaseRole + Enabled,
+                    "enabled" },
+        { BaseRole + CmName,
+                    "cmName" },
+        { BaseRole + ProtocolName,
+                    "protocolName" },
+        { BaseRole + ServiceName,
+                    "serviceName" },
+        { BaseRole + UniqueIdentifier,
+                    "uniqueIdentifier" },
     };
-//    qDebug() << extraRoles;
     return extraRoles;
 }
 
