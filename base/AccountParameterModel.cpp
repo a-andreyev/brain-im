@@ -184,7 +184,7 @@ void AccountParameterModel::setAccount(const QString &uniqueIdentifier)
 
 bool AccountParameterModel::submit()
 {
-    if (!creationMode() || m_account.isNull()) {
+    if (m_account.isNull()) {
         return false;
     }
 
