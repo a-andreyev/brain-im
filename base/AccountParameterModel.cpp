@@ -124,11 +124,16 @@ bool AccountParameterModel::setData(int index, const QVariant &value)
     const QVariant tVar = getData(index, Type);
     const int type = tVar.toInt();
     if (!value.canConvert(type)) {
-        qDebug() << Q_FUNC_INFO << "Can't convert the value to the right type" << type;
+        qWarning() << Q_FUNC_INFO << "Can't convert the value to the right type" << type;
+        return false;
+    }
+    QVariant typed = value;
+    if (!typed.convert(type)) {
+        qWarning() << Q_FUNC_INFO << "Unable to cast the value to the right type" << type;
         return false;
     }
 
-    m_values.insert(getData(index, Name).toString(), value);
+    m_values.insert(getData(index, Name).toString(), typed);
 
     return false;
 }
