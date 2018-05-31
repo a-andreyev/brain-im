@@ -84,6 +84,13 @@ ScrollablePage {
                             value: model.value
                             delayed: true
                         }
+                        Binding {
+                            target: paramEditor.item
+                            property: "secret"
+                            value: model.secret
+                            delayed: true
+                            when: model.secret
+                        }
 
                         function getComponentForType(t)
                         {
@@ -129,11 +136,13 @@ ScrollablePage {
             TextField {
                 id: textInnerDelegate
                 signal submit(var value)
+                property bool secret: false
                 property alias value: textInnerDelegate.text
                 width: 40
                 height: 48
                 selectByMouse: true
                 onTextChanged: submit(text)
+                echoMode: secret ? TextInput.Password : TextInput.Normal
             }
         }
         Component {
