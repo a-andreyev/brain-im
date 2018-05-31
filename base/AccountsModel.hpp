@@ -51,5 +51,6 @@ protected slots:
 
 protected:
     Tp::AccountManagerPtr m_manager;
+    QList<Tp::AccountPtr> m_accounts;
 
 };

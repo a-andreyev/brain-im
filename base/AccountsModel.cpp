@@ -67,13 +67,11 @@ QVariant AccountsModel::getData(int index, Role role) const
     if (role == InvalidRole) {
         return QVariant();
     }
-//    qDebug() << index << role;
-    const QList<Tp::AccountPtr> accounts = m_manager->allAccounts();
-    if (accounts.count() <= index) {
+    if (m_accounts.count() <= index) {
         return QVariant();
     }
 
-    const Tp::AccountPtr account = accounts.at(index);
+    const Tp::AccountPtr account = m_accounts.at(index);
 
     switch (role) {
     case AccountObject:
@@ -184,5 +182,6 @@ void AccountsModel::onAMReady(Tp::PendingOperation *operation)
         qDebug() << "Account manager is ready.";
     }
     beginResetModel();
+    m_accounts = m_manager->allAccounts();
     endResetModel();
 }
