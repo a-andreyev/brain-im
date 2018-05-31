@@ -237,6 +237,9 @@ void AccountParameterModel::setProtocol(const QString &protocol)
 void AccountParameterModel::setProtocolParams(const Tp::ProtocolParameterList &params)
 {
     m_protocolParams = params;
+    std::sort(m_protocolParams.begin(), m_protocolParams.end(), [](const Tp::ProtocolParameter &left, const Tp::ProtocolParameter &right) {
+        return left.name() < right.name();
+    });
 }
 
 void AccountParameterModel::setDisplayName(const QString &displayName)
