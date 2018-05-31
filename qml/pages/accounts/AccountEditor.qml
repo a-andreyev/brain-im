@@ -13,16 +13,22 @@ ScrollablePage {
     id: page
 
     function create(manager, protocol) {
+        mode = mode_create
         console.log("Create acc", manager, protocol)
         accountParameterModel.newAccount(manager, protocol)
     }
 
     function setAccount(account) {
+        mode = mode_update
         console.log("Set account", account)
         accountParameterModel.setAccount(account)
     }
 
     signal createAccount(string manager, string protocol, string displayName, variant parameters)
+
+    property int mode: mode_create
+    readonly property int mode_create: 0
+    readonly property int mode_update: 1
 
     Column {
         id: internalCol
@@ -32,18 +38,19 @@ ScrollablePage {
             id: displayNameEditor2
             height: 50
             width: 300
-            Row {
+            RowLayout {
                 spacing: 4
                 Label {
                     text: qsTr("DisplayName")
                     width: 200
-                    height: 40
+                    Layout.preferredWidth: 200
                 }
                 TextField {
                     id: displayNameEditor
                     width: 200
-                    height: 40
+                    selectByMouse: true
                     text: accountParameterModel.displayName
+                    Layout.preferredWidth: 200
                 }
             }
         }
@@ -57,25 +64,29 @@ ScrollablePage {
                 id: delegate
                 height: parametersDetailView.delegateHeight
                 width: page.width
-                Row {
+                RowLayout {
                     spacing: 4
                     Label {
                         text: model.name
-                        width: 200
+                        Layout.preferredWidth: 200
                         height: 40
                     }
                     Loader {
                         id: paramEditor
-                        property var v: model.value
                         sourceComponent: getComponentForType(model.signature)
                         width: 200
-                        height: 40
-                        onLoaded: item.value = v
-                        onVChanged: item.value = v
+                        height: 48
+                        Layout.preferredHeight: 48
+                        Layout.preferredWidth: 200
+                        Binding {
+                            target: paramEditor.item
+                            property: "value"
+                            value: model.value
+                            delayed: true
+                        }
 
                         function getComponentForType(t)
                         {
-                            console.log("Get type:" + t)
                             if (t === "u") {
                                 return intDelegate
                             } else if (t === "b") {
@@ -84,7 +95,7 @@ ScrollablePage {
                                 return textDelegate
                             }
 
-                            console.log("Fallback to text delegate")
+                            console.warn("Fallback to text delegate")
 
                             return textDelegate
                         }
@@ -98,9 +109,6 @@ ScrollablePage {
                     }
                 }
             }
-            onCountChanged: {
-                console.log("ParamsCount:", count)
-            }
         }
 
         AccountParameterModel {
@@ -112,18 +120,19 @@ ScrollablePage {
             SpinBox {
                 signal submit(var value)
                 width: 40
-                height: 40
+                height: 48
                 onValueChanged: submit(value)
             }
         }
         Component {
             id: textDelegate
             TextField {
+                id: textInnerDelegate
                 signal submit(var value)
-                property string value: ""
+                property alias value: textInnerDelegate.text
                 width: 40
-                height: 40
-                text: value
+                height: 48
+                selectByMouse: true
                 onTextChanged: submit(text)
             }
         }
@@ -133,7 +142,7 @@ ScrollablePage {
                 signal submit(var value)
                 property var value
                 width: 40
-                height: 40
+                height: 48
                 checked: value
                 onTextChanged: submit(checked)
             }
@@ -142,10 +151,14 @@ ScrollablePage {
 
     footer: Button {
         id: submitButton
-        text: qsTr("Create account")
+        text: page.mode === page.mode_create ? qsTr("Create account") : qsTr("Save")
         onClicked: {
-            console.log("Create account")
-            page.createAccount(accountParameterModel.manager, accountParameterModel.protocol, displayNameEditor.text, accountParameterModel.getVariantMap())
+            console.log(text)
+            if (page.mode === page.mode_create) {
+                page.createAccount(accountParameterModel.manager, accountParameterModel.protocol, displayNameEditor.text, accountParameterModel.getVariantMap())
+            } else {
+                accountParameterModel.submit()
+            }
         }
     }
 }
