@@ -33,7 +33,6 @@ int AccountParameterModel::rowCount(const QModelIndex &parent) const
         // || m_managerObject.isNull() || !m_managerObject->supportedProtocols().contains(m_protocol)) {
         return 0;
     }
-    qDebug() << Q_FUNC_INFO << m_protocolParams.count();
     return m_protocolParams.count();
 }
 

@@ -22,7 +22,9 @@ ApplicationWindow {
     header: ToolBar {
         ToolButton {
             text: qsTr("<")
-            onClicked: stackView.pop()
+            onClicked: {
+                stackView.pop()
+            }
             visible: stackView.depth > 1
             anchors.left: parent.left
         }
@@ -38,9 +40,7 @@ ApplicationWindow {
     StackView {
         id: stackView
         anchors.fill: parent
-        initialItem: IndexPage {
-
-        }
+        initialItem: IndexPage { }
     }
 
     Shortcut {

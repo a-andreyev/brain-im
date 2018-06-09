@@ -9,23 +9,35 @@ set(base_sources
     AccountsModel
     AccountsModel.cpp
     AccountsModel.hpp
-    ConnectionManagersModel
-    ConnectionManagersModel.cpp
-    ConnectionManagersModel.hpp
-    ProtocolsModel
-    ProtocolsModel.cpp
-    ProtocolsModel.hpp
+    AccountManager
+    AccountManager.cpp
+    AccountManager.hpp
     AccountParameterModel
     AccountParameterModel.cpp
     AccountParameterModel.hpp
+    ConnectionManagersModel
+    ConnectionManagersModel.cpp
+    ConnectionManagersModel.hpp
+    ContactsModel.cpp
+    ContactsModel.hpp
+    Core.cpp
+    Core.hpp
     DBusServiceHelper
     DBusServiceHelper.cpp
     DBusServiceHelper.hpp
-    Types.hpp
     Entity.cpp
     Entity.hpp
     Event.cpp
     Event.hpp
+    ProtocolsModel
+    ProtocolsModel.cpp
+    ProtocolsModel.hpp
+    PeersModel.cpp
+    PeersModel.hpp
+    MessagesModel.cpp
+    MessagesModel.hpp
+    Types.cpp
+    Types.hpp
 )
 
 add_library(BrainIM SHARED ${base_sources})

@@ -8,10 +8,17 @@ set(brain_qml_SOURCES
     components/ScrollablePage.qml
     pages/AccountManagement.qml
     pages/IndexPage.qml
+    pages/MainView.qml
     pages/accounts/AccountEditor.qml
     pages/accounts/AccountView.qml
     pages/accounts/ConnectionManagerView.qml
     pages/accounts/ProtocolView.qml
+    pages/dialogs/DialogDelegate.qml
+    pages/dialogs/DialogView.qml
+    pages/messages/MessageDelegate.qml
+    pages/messages/MessageEditor.qml
+    pages/messages/MessageView.qml
+    pages/messages/ServiceMessageDelegate.qml
 )
 
 add_executable(brain_im ${brain_qml_SOURCES})

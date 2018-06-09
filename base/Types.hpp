@@ -1,11 +1,16 @@
-#pragma once
+#ifndef BRAIN_TYPES
+#define BRAIN_TYPES
 
+#include <TelepathyQt/Constants>
 #include <TelepathyQt/Types>
-#include <QtCore/QList>
-#include <QtCore/QDate>
+#include <QList>
+#include <QDate>
+
+#include <QDebug>
 
 namespace BrainIM
 {
+Q_NAMESPACE
 
 enum EntityType
 {
@@ -18,6 +23,20 @@ enum EntityType
                          EntityTypeContact which represents any other user */
 };
 
+enum class MessageAction {
+    MessageActionNone, // Cancel
+    MessageActionTyping,
+    MessageActionRecordVideo,
+    MessageActionRecordAudio,
+    MessageActionUploadVideo,
+    MessageActionUploadAudio,
+    MessageActionUploadPhoto,
+    MessageActionUploadDocument,
+    MessageActionGeoLocation,
+    MessageActionChooseContact
+};
+Q_ENUM_NS(MessageAction)
+
 class Event;
 class CallEvent;
 class MessageEvent;
@@ -29,4 +48,154 @@ typedef QSharedPointer<MessageEvent> MessageEventPtr;
 typedef QSharedPointer<Entity> EntityPtr;
 typedef QSharedPointer<Event> EventPtr;
 
-}
+struct Peer
+{
+    Q_GADGET
+    Q_PROPERTY(Type type MEMBER type)
+    Q_PROPERTY(QString id MEMBER id)
+public:
+    enum Type {
+        Invalid = Tp::HandleTypeNone,
+        Contact = Tp::HandleTypeContact,
+        Room = Tp::HandleTypeRoom,
+    };
+    Q_ENUM(Type)
+
+    Peer() = default;
+
+    Peer(const QString &id, Type t) : type(t), id(id)
+    {
+    }
+
+    Type type = Type::Invalid;
+    QString id;
+
+    Q_INVOKABLE bool isValid() const { return (type != Type::Invalid) && id.isEmpty(); }
+
+    bool operator==(const Peer &p) const
+    {
+        return (p.type == type) && (p.id == id);
+    }
+
+    static Peer fromContactId(const QString &id)
+    {
+        return Peer(id, Contact);
+    }
+
+    static Peer fromRoomId(const QString &id)
+    {
+        return Peer(id, Room);
+    }
+};
+
+class Brain : public QObject
+{
+    Q_OBJECT
+public:
+    enum ContactStatus {
+        ContactStatusUnknown,
+        ContactStatusOffline,
+        ContactStatusOnline
+    };
+    Q_ENUM(ContactStatus)
+
+    enum AuthSignError {
+        AuthSignErrorUnknown,
+        AuthSignErrorAppIdIsInvalid,
+        AuthSignErrorPhoneNumberIsInvalid,
+        AuthSignErrorPhoneNumberIsOccupied,
+        AuthSignErrorPhoneNumberIsUnoccupied,
+        AuthSignErrorPhoneCodeIsInvalid,
+        AuthSignErrorPhoneCodeIsExpired,
+        AuthSignErrorPasswordHashInvalid,
+        AuthSignErrorFirstNameIsInvalid,
+        AuthSignErrorLastNameIsInvalid
+    };
+    Q_ENUM(AuthSignError)
+
+    enum UnauthorizedError {
+        UnauthorizedUnknownError,
+        UnauthorizedErrorKeyUnregistered,
+        UnauthorizedErrorKeyInvalid,
+        UnauthorizedErrorUserDeactivated,
+        UnauthorizedErrorUserSessionRevoked,
+        UnauthorizedErrorUserSessionExpired,
+        UnauthorizedErrorActiveUserRequired,
+        UnauthorizedErrorNeedPermanentKey,
+        UnauthorizedSessionPasswordNeeded,
+    };
+    Q_ENUM(UnauthorizedError)
+
+    enum UserNameStatus {
+        UserNameStatusUnknown,
+        UserNameStatusIsInvalid,
+        UserNameStatusIsOccupied,
+        UserNameStatusIsNotModified,
+        UserNameStatusCanBeUsed,
+        UserNameStatusCanNotBeUsed,
+        UserNameStatusResolved,
+        UserNameStatusAccepted
+    };
+    Q_ENUM(UserNameStatus)
+
+    enum ConnectionState {
+        ConnectionStateDisconnected,
+        ConnectionStateConnecting,
+        ConnectionStateConnected,
+        ConnectionStateAuthRequired,
+        ConnectionStateAuthenticated,
+        ConnectionStateReady // Initializated
+    };
+    Q_ENUM(ConnectionState)
+
+    enum ContactLastOnline {
+        ContactLastOnlineUnknown,
+        ContactLastOnlineRecently,
+        ContactLastOnlineLastWeek,
+        ContactLastOnlineLastMonth,
+        ContactLastOnlineMask = 0xf
+    };
+
+    explicit Brain(QObject *parent = nullptr)
+        : QObject(parent)
+    {
+    }
+
+    Q_INVOKABLE static BrainIM::Peer emptyPeer()
+    {
+        return Peer();
+    }
+
+    Q_INVOKABLE static BrainIM::Peer makePeer(const QString &id, int type)
+    {
+        switch(type) {
+        case Peer::Type::Contact:
+            return Peer(id, Peer::Type::Contact);
+        case Peer::Type::Room:
+            return Peer(id, Peer::Type::Room);
+        default:
+            break;
+        }
+        return Peer();
+    }
+
+    Q_INVOKABLE static BrainIM::Peer peerFromContactId(const QString &id)
+    {
+        return Peer(id, Peer::Contact);
+    }
+
+    Q_INVOKABLE static BrainIM::Peer peerFromRoomId(const QString &id)
+    {
+        return Peer(id, Peer::Room);
+    }
+
+private:
+    Q_DISABLE_COPY(Brain)
+};
+
+} // BrainIM namespace
+
+Q_DECLARE_METATYPE(BrainIM::Peer)
+Q_DECLARE_METATYPE(BrainIM::Peer::Type)
+
+#endif // BRAIN_TYPES

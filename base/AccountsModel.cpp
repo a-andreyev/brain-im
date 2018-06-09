@@ -87,7 +87,7 @@ QVariant AccountsModel::getData(int index, Role role) const
     case ServiceName:
         return account->serviceName();
     case UniqueIdentifier:
-//        return account->uniqueIdentifier();
+        //return account->uniqueIdentifier();
         return account->objectPath();
     default:
         return QVariant();

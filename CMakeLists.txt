@@ -30,6 +30,7 @@ find_package(TelepathyQt5 0.9.6 REQUIRED)
 include(GNUInstallDirs)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -std=c++11 -Werror=return-type")
 
 add_subdirectory(base)
 
