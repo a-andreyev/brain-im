@@ -33,7 +33,7 @@ QHash<int, QByteArray> ContactsModel::roleNames() const
 
 bool ContactsModel::hasPeer(const Peer peer) const
 {
-    if (peer.type != Peer::Contact) {
+    if (peer.type != Peer::Type::Contact) {
         return false;
     }
     return indexOfContact(peer.id) >= 0;
@@ -41,7 +41,7 @@ bool ContactsModel::hasPeer(const Peer peer) const
 
 QString ContactsModel::getName(const Peer peer) const
 {
-    if (peer.type != Peer::Contact) {
+    if (peer.type != Peer::Type::Contact) {
         return QString();
     }
     const int i = indexOfContact(peer.id);
@@ -115,7 +115,7 @@ QVariant ContactsModel::getData(int index, Role role) const
     case Role::Alias:
         return contact->alias();
     case Role::Peer:
-        return QVariant::fromValue(Peer(contact->id(), Peer::Contact));
+        return QVariant::fromValue(Peer(contact->id(), Peer::Type::Contact));
     //    return m_contacts.at(contactIndex).id();
     //case Phone:
     //    return m_contacts.at(contactIndex).phone();
@@ -245,6 +245,7 @@ void ContactsModel::onAMReady()
     Tp::ConnectionPtr conn = acc->connection();
     if (!conn) {
         qWarning() << Q_FUNC_INFO << "no account connection";
+        //QTimer::singleShot(200, this, &ContactsModel::onAMReady);
         return;
     }
     Tp::ContactManagerPtr connContacts = conn->contactManager();

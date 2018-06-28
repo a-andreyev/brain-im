@@ -14,7 +14,26 @@ Item {
     TextMetrics {
         id: metrics
         font: label.font
-        text: delegate.plainText
+        text: delegate.text
+    }
+
+    function formatActionText(actionDetails)
+    {
+        switch (actionDetails.actionType) {
+        case ServiceAction.AddParticipant:
+            if ((actionDetails.users.length === 1) && (actionDetails.users[0] === actionDetails.actor)) {
+                return actionDetails.actor + " joined the chat"
+            }
+            return actionDetails.actor + " added " + actionDetails.users
+        case ServiceAction.DeleteParticipant:
+            if ((actionDetails.users.length === 1) && (actionDetails.users[0] === actionDetails.actor)) {
+                return actionDetails.actor + " left the chat";
+            }
+            return actionDetails.actor + " removed " + actionDetails.users + "from the chat";
+        case ServiceAction.Invalid:
+        default:
+            return "Invalid action"
+        }
     }
 
     Rectangle {
@@ -25,10 +44,11 @@ Item {
         height: metrics.height + 10
         //color: Theme.highlightBackgroundColor
         radius: 10
+        color: "lightblue"
     }
+
     Label {
         id: label
-        //color: "white"
         anchors.centerIn: background
         onLinkActivated: delegate.linkActivated(link)
         MouseArea {

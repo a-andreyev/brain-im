@@ -1,4 +1,7 @@
-#pragma once
+#ifndef BRAIN_IM_PROTOCOLS_MODEL
+#define BRAIN_IM_PROTOCOLS_MODEL
+
+#include "global.h"
 
 #include <QAbstractTableModel>
 
@@ -8,7 +11,7 @@
 #include <TelepathyQt/ProtocolInfoList>
 #include <TelepathyQt/ConnectionManager>
 
-class ProtocolsModel : public QAbstractTableModel
+class BRAIN_IM_EXPORT ProtocolsModel : public QAbstractTableModel
 {
     Q_OBJECT
     Q_PROPERTY(QStringList managers READ managers WRITE setManagers NOTIFY managersChanged)
@@ -45,3 +48,5 @@ protected:
     QVector<Tp::ConnectionManagerPtr> m_managers2;
 
 };
+
+#endif // BRAIN_IM_PROTOCOLS_MODEL

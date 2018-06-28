@@ -17,7 +17,7 @@ Page {
             height: parent.height
             onActivateDialog: {
                 console.log("Activate dialog peer(" + peer.type + ", " + peer.id + ")")
-                messageView.peer = Brain.makePeer(peer.id, peer.type)
+                messageView.peer = Brain.peer(peer.id, peer.type)
             }
         }
 
@@ -47,7 +47,7 @@ Page {
         id: messageSendStubProxy
         signal messageSent(string message, var peer)
         onMessageSent: {
-            var typeText = (peer.type == 0 ? "User" : "Chat")
+            var typeText = (peer.type === Peer.Contact ? "User" : "Chat")
             console.log("Message to " + typeText + " " + peer.id)
         }
         signal draftChanged(string message, var peer)

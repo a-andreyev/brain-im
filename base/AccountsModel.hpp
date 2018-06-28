@@ -1,4 +1,7 @@
-#pragma once
+#ifndef BRAIN_IM_ACCOUNTS_MODEL
+#define BRAIN_IM_ACCOUNTS_MODEL
+
+#include "global.h"
 
 #include <QAbstractTableModel>
 
@@ -7,7 +10,7 @@
 #include <TelepathyQt/PendingReady>
 #include <TelepathyQt/AccountManager>
 
-class AccountsModel : public QAbstractTableModel
+class BRAIN_IM_EXPORT AccountsModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
@@ -54,3 +57,5 @@ protected:
     QList<Tp::AccountPtr> m_accounts;
 
 };
+
+#endif // BRAIN_IM_ACCOUNTS_MODEL

@@ -1,4 +1,7 @@
-#pragma once
+#ifndef BRAIN_IM_CONNECTION_MANAGERS_MODEL
+#define BRAIN_IM_CONNECTION_MANAGERS_MODEL
+
+#include "global.h"
 
 #include <QAbstractTableModel>
 
@@ -7,7 +10,7 @@
 #include <TelepathyQt/PendingReady>
 #include <TelepathyQt/AccountManager>
 
-class ConnectionManagersModel : public QAbstractTableModel
+class BRAIN_IM_EXPORT ConnectionManagersModel : public QAbstractTableModel
 {
     Q_OBJECT
     Q_PROPERTY(QStringList managers READ managers NOTIFY managersChanged)
@@ -40,3 +43,5 @@ protected:
     QStringList m_managers;
 
 };
+
+#endif // BRAIN_IM_CONNECTION_MANAGERS_MODEL

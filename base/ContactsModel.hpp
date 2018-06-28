@@ -1,6 +1,8 @@
 #ifndef BRAIN_IM_CONTACTS_MODEL
 #define BRAIN_IM_CONTACTS_MODEL
 
+#include "global.h"
+
 #include <QList>
 #include <QStringList>
 #include <QSet>
@@ -15,7 +17,7 @@ struct SContact
     MessageAction typing = MessageAction::MessageActionNone;
 };
 
-class ContactsModel : public PeersModel
+class BRAIN_IM_EXPORT ContactsModel : public PeersModel
 {
     Q_OBJECT
 public:

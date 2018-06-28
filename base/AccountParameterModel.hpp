@@ -1,4 +1,7 @@
-#pragma once
+#ifndef BRAIN_IM_ACCOUNT_PARAMETER_MODEL
+#define BRAIN_IM_ACCOUNT_PARAMETER_MODEL
+
+#include "global.h"
 
 #include <QAbstractTableModel>
 
@@ -9,7 +12,7 @@
 #include <TelepathyQt/ConnectionManager>
 #include <TelepathyQt/Account>
 
-class AccountParameterModel : public QAbstractTableModel
+class BRAIN_IM_EXPORT AccountParameterModel : public QAbstractTableModel
 {
     Q_OBJECT
     Q_PROPERTY(QString manager READ manager NOTIFY managerChanged)
@@ -83,3 +86,5 @@ protected:
     bool m_creationMode;
 
 };
+
+#endif // BRAIN_IM_ACCOUNT_PARAMETER_MODEL

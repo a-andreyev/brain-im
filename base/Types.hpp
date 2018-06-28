@@ -1,6 +1,8 @@
 #ifndef BRAIN_TYPES
 #define BRAIN_TYPES
 
+#include "global.h"
+
 #include <TelepathyQt/Constants>
 #include <TelepathyQt/Types>
 #include <QList>
@@ -10,7 +12,10 @@
 
 namespace BrainIM
 {
-Q_NAMESPACE
+    BRAIN_IM_EXPORT Q_NAMESPACE
+
+//    BRAIN_IM_EXPORT extern const QMetaObject staticMetaObject;
+//    QT_ANNOTATE_CLASS(qt_qnamespace, "")
 
 enum EntityType
 {
@@ -48,11 +53,9 @@ typedef QSharedPointer<MessageEvent> MessageEventPtr;
 typedef QSharedPointer<Entity> EntityPtr;
 typedef QSharedPointer<Event> EventPtr;
 
-struct Peer
+class BRAIN_IM_EXPORT PeerEnums : public QObject
 {
-    Q_GADGET
-    Q_PROPERTY(Type type MEMBER type)
-    Q_PROPERTY(QString id MEMBER id)
+    Q_OBJECT
 public:
     enum Type {
         Invalid = Tp::HandleTypeNone,
@@ -60,6 +63,15 @@ public:
         Room = Tp::HandleTypeRoom,
     };
     Q_ENUM(Type)
+};
+
+struct BRAIN_IM_EXPORT Peer
+{
+    Q_GADGET
+    Q_PROPERTY(Type type MEMBER type)
+    Q_PROPERTY(QString id MEMBER id)
+public:
+    using Type = PeerEnums::Type;
 
     Peer() = default;
 
@@ -79,16 +91,16 @@ public:
 
     static Peer fromContactId(const QString &id)
     {
-        return Peer(id, Contact);
+        return Peer(id, Type::Contact);
     }
 
     static Peer fromRoomId(const QString &id)
     {
-        return Peer(id, Room);
+        return Peer(id, Type::Room);
     }
 };
 
-class Brain : public QObject
+class BRAIN_IM_EXPORT Brain : public QObject
 {
     Q_OBJECT
 public:
@@ -166,7 +178,7 @@ public:
         return Peer();
     }
 
-    Q_INVOKABLE static BrainIM::Peer makePeer(const QString &id, int type)
+    Q_INVOKABLE static BrainIM::Peer peer(const QString &id, int type)
     {
         switch(type) {
         case Peer::Type::Contact:
@@ -181,12 +193,12 @@ public:
 
     Q_INVOKABLE static BrainIM::Peer peerFromContactId(const QString &id)
     {
-        return Peer(id, Peer::Contact);
+        return Peer(id, Peer::Type::Contact);
     }
 
     Q_INVOKABLE static BrainIM::Peer peerFromRoomId(const QString &id)
     {
-        return Peer(id, Peer::Room);
+        return Peer(id, Peer::Type::Room);
     }
 
 private:

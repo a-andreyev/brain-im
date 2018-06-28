@@ -11,51 +11,52 @@
 #include "ContactsModel.hpp"
 #include "MessagesModel.hpp"
 #include "ProtocolsModel.hpp"
+#include "Event.hpp"
 
 #include "Types.hpp"
 
-class MessagesModel : public QObject
-{
-    Q_OBJECT
-    Q_PROPERTY(BrainIM::Peer peer READ peer WRITE setPeer NOTIFY peerChanged)
-public:
-    explicit MessagesModel(QObject *parent = nullptr) :
-        QObject(parent)
-    {
-    }
+//class MessagesModel : public QObject
+//{
+//    Q_OBJECT
+//    Q_PROPERTY(BrainIM::Peer peer READ peer WRITE setPeer NOTIFY peerChanged)
+//public:
+//    explicit MessagesModel(QObject *parent = nullptr) :
+//        QObject(parent)
+//    {
+//    }
 
-    enum MessageType {
-        MessageTypeText,
-        MessageTypePhoto,
-        MessageTypeAudio,
-        MessageTypeVideo,
-        MessageTypeContact,
-        MessageTypeDocument,
-        MessageTypeGeo,
-        MessageTypeWebPage,
-        MessageTypeNewDay,
-        MessageTypeServiceAction,
-    };
-    Q_ENUM(MessageType)
+//    enum MessageType {
+//        MessageTypeText,
+//        MessageTypePhoto,
+//        MessageTypeAudio,
+//        MessageTypeVideo,
+//        MessageTypeContact,
+//        MessageTypeDocument,
+//        MessageTypeGeo,
+//        MessageTypeWebPage,
+//        MessageTypeNewDay,
+//        MessageTypeServiceAction,
+//    };
+//    Q_ENUM(MessageType)
 
-    BrainIM::Peer peer() const { return m_peer; }
+//    BrainIM::Peer peer() const { return m_peer; }
 
-public slots:
-    void setPeer(const BrainIM::Peer peer)
-    {
-        if (m_peer == peer) {
-            return;
-        }
-        m_peer = peer;
-        emit peerChanged(peer);
-    }
+//public slots:
+//    void setPeer(const BrainIM::Peer peer)
+//    {
+//        if (m_peer == peer) {
+//            return;
+//        }
+//        m_peer = peer;
+//        emit peerChanged(peer);
+//    }
 
-signals:
-    void peerChanged(BrainIM::Peer peer);
+//signals:
+//    void peerChanged(BrainIM::Peer peer);
 
-protected:
-    BrainIM::Peer m_peer;
-};
+//protected:
+//    BrainIM::Peer m_peer;
+//};
 
 class MessageSender : public QObject
 {
@@ -140,16 +141,21 @@ int main(int argc, char *argv[])
     qmlRegisterType<ConnectionManagersModel>(uri, 0, 1, "ConnectionManagersModel");
     qmlRegisterType<ProtocolsModel>(uri, 0, 1, "ProtocolsModel");
     qmlRegisterType<AccountParameterModel>(uri, 0, 1, "AccountParameterModel");
-    qmlRegisterType<MessagesModel>(uri, 0, 1, "MessageModel");
     qmlRegisterType<MessageSender>(uri, 0, 1, "MessageSender");
     qmlRegisterType<BrainIM::ContactsModel>(uri, 0, 1, "ContactsModel");
     qmlRegisterType<BrainIM::MessagesModel>(uri, 0, 1, "MessagesModel");
+    //qmlRegisterType<BrainIM::MessageEntity>(uri, 0, 1, "MessageEntity");
     qmlRegisterSingletonType<BrainIM::Brain>(uri, 0, 1, "Brain", &brain_provider);
 
     qmlRegisterUncreatableMetaObject(BrainIM::staticMetaObject,
                                      uri, 0, 1,                 // major and minor version of the import
                                      "BrainIM",            // name in QML
                                      "Error: only enums"); // error in case someone tries to create a MyNamespace object
+
+    qmlRegisterUncreatableType<BrainIM::PeerEnums>(uri, 0, 1, "Peer", "The class can be created only from C++");
+    qmlRegisterUncreatableType<BrainIM::EventEnums>(uri, 0, 1, "Event", "The class can be created only from C++");
+    qmlRegisterUncreatableType<BrainIM::MessageEnums>(uri, 0, 1, "Message", "The class can be created only from C++");
+    qmlRegisterUncreatableType<BrainIM::ServiceActionEnums>(uri, 0, 1, "ServiceAction", "The class can be created only from C++");
 
     qmlRegisterUncreatableType<Tp::Account>("TelepathyQt", 0, 1, "Account", "The class can be created only from C++");
 //    qmlRegisterUncreatableType<Tp::Profile>("TelepathyQt", 0, 1, "Profile", "The class can be created only from C++");
@@ -158,13 +164,6 @@ int main(int argc, char *argv[])
     engine.load(QUrl(QStringLiteral("main.qml")));
 
     Tp::registerTypes();
-
-//    AccountsModel model;
-
-//    QTableView view;
-//    view.setModel(&model);
-//    view.show();
-
 
     return app.exec();
 }

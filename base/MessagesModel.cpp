@@ -57,6 +57,12 @@ static const int UserRoleOffset = Qt::UserRole + 1;
 //    }
 //}
 
+/*!
+    \class MessagesModel
+    \brief provides a data model for all kind of events
+    \inmodule Models
+*/
+
 MessagesModel::MessagesModel(QObject *parent) :
     QAbstractTableModel(parent)
 {
@@ -67,6 +73,7 @@ MessagesModel::MessagesModel(QObject *parent) :
 //            SLOT(setMessageInboxRead(Telegram::Peer,quint32)));
 //    connect(m_backend, SIGNAL(messageReadOutbox(Telegram::Peer,quint32)),
     //            SLOT(setMessageOutboxRead(Telegram::Peer,quint32)));
+    QTimer::singleShot(200, this, &MessagesModel::populate);
 }
 
 int MessagesModel::rowCount(const QModelIndex &parent) const
@@ -74,7 +81,7 @@ int MessagesModel::rowCount(const QModelIndex &parent) const
     if (parent.isValid()) {
         return 0;
     }
-    return m_messages.count();
+    return m_events.count();
 }
 
 //void MessagesModel::setFileManager(CFileManager *manager)
@@ -86,6 +93,28 @@ int MessagesModel::rowCount(const QModelIndex &parent) const
 void MessagesModel::setContactsModel(ContactsModel *model)
 {
     m_contactsModel = model;
+}
+
+QHash<int, QByteArray> MessagesModel::roleNames() const
+{
+    static const QHash<int, QByteArray> extraRoles {
+        { UserRoleOffset + static_cast<int>(Role::Identifier), "identifier" },
+        { UserRoleOffset + static_cast<int>(Role::Peer), "peer" },
+        { UserRoleOffset + static_cast<int>(Role::MessageType), "messageType" },
+        { UserRoleOffset + static_cast<int>(Role::EntityType), "entityType" },
+        { UserRoleOffset + static_cast<int>(Role::Timestamp), "timestamp" },
+        { UserRoleOffset + static_cast<int>(Role::SentTimestamp), "sentTimestamp" },
+        { UserRoleOffset + static_cast<int>(Role::ReceivedTimestamp), "receivedTimestamp" },
+        { UserRoleOffset + static_cast<int>(Role::Message), "message" },
+        { UserRoleOffset + static_cast<int>(Role::NewDay), "newDay" },
+        { UserRoleOffset + static_cast<int>(Role::ActionType), "actionType" },
+        { UserRoleOffset + static_cast<int>(Role::Actor), "actor" },
+        { UserRoleOffset + static_cast<int>(Role::Users), "users" },
+        { UserRoleOffset + static_cast<int>(Role::PreviousEntry), "previousMessage" },
+        { UserRoleOffset + static_cast<int>(Role::NextEntry), "nextMessage" },
+    };
+
+    return extraRoles;
 }
 
 //QString MessagesModel::peerToText(const Telegram::Peer &peer) const
@@ -153,51 +182,100 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const
 
 QVariant MessagesModel::getData(int index, Role role) const
 {
-    if (index < 0 || index >= m_messages.count()) {
+    if (index < 0 || index >= m_events.count()) {
         return QVariant();
     }
 
-    const Message *message = m_messages.at(index);
-    switch (role) {
-    case Role::Peer:
-        return QVariant::fromValue(message->peer());
-//    case PeerText:
-//        return peerToText(message.peer());
-//    case Contact:
-//        if (m_contactsModel) {
-//            const SContact *contact = m_contactsModel->getContact(message.fromId);
-//            if (contact) {
-//                return CContactModel::getContactName(*contact);
-//            }
-//        }
-//        return message.fromId;
-//    case Direction:
-//        return (message.flags & TelegramNamespace::MessageFlagOut) ? tr("out") : tr("in");
-//    case Timestamp:
-//        return QDateTime::fromMSecsSinceEpoch(quint64(message.timestamp) * 1000);
-//    case MessageId:
-//        return message.id ? message.id : message.id64;
-//    case Message:
-//        return message.text;
-//    case Status:
-//        return messageDeliveryStatusStr(message.status);
-//    case ForwardFrom:
-//        return QVariant::fromValue(message.forwardFromPeer());
-//    case ForwardFromText:
-//        if (message.forwardFromPeer().isValid()) {
-//            return peerToText(message.forwardFromPeer());
-//        }
-//        return QString();
-//    case ForwardTimestamp:
-//        if (message.fwdTimestamp) {
-//            return QDateTime::fromMSecsSinceEpoch(quint64(message.fwdTimestamp) * 1000);
-//        }
-//        break;
-    default:
-        break;
+    union {
+        const Event *event;
+        const Message *message;
+        const ServiceAction *serviceAction;
+        const NewDayAction *newDay;
+        //const Call *call;
+        //const FileTransfer *fileTransfer;
+    };
+    event = m_events.at(index);
+
+    if (role == Role::EntityType) {
+        return QVariant::fromValue(static_cast<int>(event->type));
     }
 
+    switch (event->type) {
+    case Event::Type::NewDay:
+        switch (role) {
+        case Role::Timestamp:
+            return newDay->date;
+        default:
+            return QVariant();
+        }
+    case Event::Type::ServiceAction:
+        switch (role) {
+        case Role::ActionType:
+            return QVariant::fromValue(static_cast<int>(serviceAction->actionType));
+        case Role::Timestamp:
+            return serviceAction->date;
+        case Role::Actor:
+            return serviceAction->actor;
+        case Role::Users:
+            return serviceAction->users;
+        default:
+            return QVariant();
+        }
+    case Event::Type::Message:
+        switch (role) {
+        case Role::MessageType:
+            return QVariant::fromValue(static_cast<int>(message->messageType));
+        case Role::SentTimestamp:
+            return QVariant::fromValue(QDateTime::fromSecsSinceEpoch(message->sentTimestamp));
+        case Role::ReceivedTimestamp:
+            return QVariant::fromValue(QDateTime::fromSecsSinceEpoch(message->receivedTimestamp));
+        case Role::Identifier:
+            return QVariant::fromValue(message->id);
+        case Role::Peer:
+            return QVariant::fromValue(message->peer());
+        case Role::Message:
+            return QVariant::fromValue(*message);
+        case Role::PreviousEntry:
+            return getSiblingEntryData(index - 1);
+        case Role::NextEntry:
+            return getSiblingEntryData(index + 1);
+        default:
+            return QVariant();
+        }
+    default:
+        return QVariant();
+    }
+
+    Q_UNREACHABLE();
     return QVariant();
+}
+
+QVariant MessagesModel::getSiblingEntryData(int index) const
+{
+    if (index < 0 || index >= m_events.count()) {
+        return QVariant();
+    }
+
+    union {
+        const Event *event;
+        const Message *message;
+        const ServiceAction *serviceAction;
+        const NewDayAction *newDay;
+        //const Call *call;
+        //const FileTransfer *fileTransfer;
+    };
+    event = m_events.at(index);
+
+    if (event->type != Event::Type::Message) {
+        return QVariant();
+    }
+
+    return QVariantMap({
+                           { roleToName(Role::MessageType),
+                             QVariant::fromValue(static_cast<int>(message->messageType)) },
+                           { roleToName(Role::Peer),
+                             QVariant::fromValue(message->peer()) },
+                       });
 }
 
 //const MessagesModel::SMessage *MessagesModel::messageAt(quint32 messageIndex) const
@@ -223,8 +301,8 @@ QVariant MessagesModel::getData(int index, Role role) const
 //    return -1;
 //}
 
-//void MessagesModel::addMessage(const SMessage &message)
-//{
+void MessagesModel::addMessages(const QVector<BrainIM::Message> &messages)
+{
 //    Telegram::MessageMediaInfo mediaInfo;
 //    Telegram::RemoteFile fileInfo;
 //    SMessage processedMessage = message;
@@ -280,7 +358,7 @@ QVariant MessagesModel::getData(int index, Role role) const
 //        const QString uniqueId = m_fileManager->requestFile(fileInfo);
 //        m_fileRequests.insert(uniqueId, id);
 //    }
-//}
+}
 
 //void MessagesModel::onFileRequestComplete(const QString &uniqueId)
 //{
@@ -370,8 +448,95 @@ QVariant MessagesModel::getData(int index, Role role) const
 void MessagesModel::clear()
 {
     beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
-    m_messages.clear();
+    m_events.clear();
     endRemoveRows();
+}
+
+void MessagesModel::setPeer(const Peer peer)
+{
+    if (m_peer == peer) {
+        return;
+    }
+    m_peer = peer;
+    emit peerChanged(peer);
+}
+
+void MessagesModel::populate()
+{
+    beginResetModel();
+    m_events.clear();
+    {
+        Event *event = new BrainIM::NewDayAction(QDate::currentDate().addMonths(-2));
+        m_events << event;
+    }
+
+    {
+        BrainIM::ServiceAction *event = new BrainIM::ServiceAction();
+        event->actionType = ServiceAction::ActionType::AddParticipant;
+        event->date = QDateTime::currentDateTimeUtc().addMonths(-1);
+        event->actor = QStringLiteral("Andy Hall");
+        event->users = QStringList({ QStringLiteral("Andy Hall") });
+        m_events << event;
+    }
+
+    {
+        BrainIM::ServiceAction *event = new BrainIM::ServiceAction();
+        event->actionType = ServiceAction::ActionType::AddParticipant;
+        event->date = QDateTime::currentDateTimeUtc().addMonths(-1);
+        event->actor = QStringLiteral("Andy Hall");
+        event->users = QStringList({ QStringLiteral("Daniel Ash") });
+        m_events << event;
+    }
+
+    {
+        Message *event = new BrainIM::Message();
+        event->setPeer(Peer(QStringLiteral("andy"), Peer::Type::Contact));
+        event->text = QStringLiteral("Well, I don't know about that.");
+        event->receivedTimestamp = QDateTime::currentDateTimeUtc().toSecsSinceEpoch() - 60 * 60 * 24 * 1.1; // Two days ago
+        event->sentTimestamp = event->receivedTimestamp - 10;
+        m_events << event;
+    }
+
+    {
+        Message *event = new BrainIM::Message();
+        event->setPeer(Peer(QStringLiteral("daniel"), Peer::Type::Contact));
+        event->type = Event::Type::Message;
+        event->text = QStringLiteral("It's a joke we were joking around, you see?");
+        event->receivedTimestamp = QDateTime::currentDateTimeUtc().toSecsSinceEpoch() - 120;
+        event->sentTimestamp = event->receivedTimestamp - 10;
+        m_events << event;
+    }
+
+    {
+        Message *event = new BrainIM::Message();
+        event->setPeer(Peer(QStringLiteral("daniel"), Peer::Type::Contact));
+        event->type = Event::Type::Message;
+        event->text = QStringLiteral("We totally got you!");
+        event->receivedTimestamp = QDateTime::currentDateTimeUtc().toSecsSinceEpoch();
+        event->sentTimestamp = event->receivedTimestamp - 10;
+        m_events << event;
+    }
+
+    {
+        BrainIM::ServiceAction *event = new BrainIM::ServiceAction();
+        event->actionType = ServiceAction::ActionType::DeleteParticipant;
+        event->date = QDateTime::currentDateTimeUtc().addMonths(-1);
+        event->actor = QStringLiteral("Andy Hall");
+        event->users = QStringList({ QStringLiteral("Andy Hall") });
+        m_events << event;
+    }
+
+    {
+        Message *event = new BrainIM::Message();
+        event->type = Event::Type::Message;
+        event->setPeer(Peer(QStringLiteral("daniel"), Peer::Type::Contact));
+        event->text = QStringLiteral("We work hard, we play hard");
+        event->receivedTimestamp = QDateTime::currentDateTimeUtc().toSecsSinceEpoch();
+        event->sentTimestamp = event->receivedTimestamp;
+        m_events << event;
+    }
+
+    endResetModel();
 }
 
 MessagesModel::Role MessagesModel::intToRole(int value)
@@ -404,7 +569,7 @@ MessagesModel::Role MessagesModel::indexToRole(const QModelIndex &index, int rol
         switch (section) {
         case Column::MessageId:
             return Role::Identifier;
-        case Column::Message:
+        case Column::MessageText:
             return Role::Message;
         default:
             break;
@@ -415,6 +580,25 @@ MessagesModel::Role MessagesModel::indexToRole(const QModelIndex &index, int rol
     }
 
     return Role::Invalid;
+}
+
+QString MessagesModel::roleToName(MessagesModel::Role role) const
+{
+    static QHash<int, QString> names;
+    if (Q_UNLIKELY(names.isEmpty())) {
+        constexpr int count = static_cast<int>(Role::Count);
+        names.reserve(count);
+        for (int i = 0; i < count; ++i) {
+            names[i] = QString::fromLatin1(roleNames()[UserRoleOffset + i]);
+        }
+    }
+    return names.value(static_cast<int>(role));
+}
+
+Message::Message() :
+    Event()
+{
+    type = Event::Type::Message;
 }
 
 } // BrainIM namespace

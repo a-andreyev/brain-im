@@ -38,8 +38,10 @@ set(base_sources
     MessagesModel.hpp
     Types.cpp
     Types.hpp
+    global.h
 )
 
+add_definitions(-DBRAIN_IM_LIBRARY)
 add_library(BrainIM SHARED ${base_sources})
 
 set_target_properties(BrainIM PROPERTIES AUTOMOC TRUE)

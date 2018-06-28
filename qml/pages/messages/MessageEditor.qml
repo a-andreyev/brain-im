@@ -8,6 +8,7 @@ Item {
     height: 64
     width: 200
 
+    Pane { anchors.fill: parent }
     Frame { anchors.fill: parent } // Decoration
 
     property alias peer: sender.peer

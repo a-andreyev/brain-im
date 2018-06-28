@@ -18,17 +18,20 @@
 #ifndef BRAIN_IM_MESSAGES_MODEL_HPP
 #define BRAIN_IM_MESSAGES_MODEL_HPP
 
+#include "global.h"
+
 #include <QAbstractTableModel>
 
+#include "Event.hpp"
 #include "Types.hpp"
 
 namespace BrainIM {
 
 class ContactsModel;
 
-struct Message
+struct BRAIN_IM_EXPORT MessageEnums : public QObject
 {
-    Q_GADGET
+    Q_OBJECT
 public:
     enum class Status {
         Unknown,
@@ -51,7 +54,7 @@ public:
     Q_DECLARE_FLAGS(Flags, Flag)
 
     enum class Type {
-        Unsupported = 0x00,
+        Invalid     = 0x00,
         Text        = 0x01,
         Photo       = 0x02,
         Audio       = 0x04,
@@ -64,8 +67,22 @@ public:
     };
     Q_ENUM(Type)
     Q_DECLARE_FLAGS(TypeFlags, Type)
+};
 
-    quint32 fromId; // Telegram user id
+struct BRAIN_IM_EXPORT Message : public Event
+{
+    Q_GADGET
+    Q_PROPERTY(QString text MEMBER text)
+public:
+    using Status = MessageEnums::Status;
+    using Flag = MessageEnums::Flag;
+    using Flags = MessageEnums::Flags;
+    using Type = MessageEnums::Type;
+    using TypeFlags = MessageEnums::TypeFlags;
+
+    Message();
+
+    quint32 fromId = 0; // Sender handle
 
     const Peer peer() const { return m_peer; }
     void setPeer(const Peer &peer) { m_peer = peer; }
@@ -73,31 +90,80 @@ public:
     const Peer forwardFromPeer() const { return m_forwardPeer; }
     void setForwardFromPeer(const Peer &peer) { m_forwardPeer = peer; }
 
-    quint32 replyToMessageId;
-    quint32 forwardContactId;
+    quint32 replyToMessageId = 0;
+    quint32 forwardContactId = 0; // If forward peer is a group chat, then the contact is the actual sender.
     QString text;
-    quint32 id;
-    quint32 timestamp;
-    quint32 fwdTimestamp;
-    Status status;
-    Type type;
+    quint32 id = 0;
+    quint32 sentTimestamp = 0;
+    quint32 receivedTimestamp = 0;
+    quint32 fwdTimestamp = 0;
+    Status status = Status::Unknown;
+    Type messageType = Type::Invalid;
     Flags flags;
 
     Peer m_peer;
     Peer m_forwardPeer;
 };
 
-class MessagesModel : public QAbstractTableModel
+class BRAIN_IM_EXPORT ServiceActionEnums : public QObject
 {
     Q_OBJECT
+public:
+    enum class Type {
+        Invalid,
+        AddParticipant,
+        DeleteParticipant,
+    };
+    Q_ENUM(Type)
+};
+
+struct BRAIN_IM_EXPORT ServiceAction : public Event
+{
+    Q_GADGET
+    Q_PROPERTY(QDateTime date MEMBER date)
+public:
+    using ActionType = ServiceActionEnums::Type;
+    ServiceAction()
+    {
+        type = Event::Type::ServiceAction;
+    }
+
+    QDateTime date;
+    ActionType actionType = ActionType::Invalid;
+    QString actor;
+    QStringList users;
+};
+
+struct BRAIN_IM_EXPORT NewDayAction : public Event
+{
+    Q_GADGET
+    Q_PROPERTY(QDate date MEMBER date)
+public:
+    explicit NewDayAction(const QDate &d = QDate()) :
+        date(d)
+    {
+        type = Event::Type::NewDay;
+    }
+
+    QDate date;
+};
+
+class BRAIN_IM_EXPORT MessagesModel : public QAbstractTableModel
+{
+    Q_OBJECT
+    Q_PROPERTY(Classes enabledClass NOTIFY classChanged)
+    Q_PROPERTY(BrainIM::Peer peer READ peer WRITE setPeer NOTIFY peerChanged)
 public:
     enum class Column {
         Peer,
         Contact,
         Direction,
-        Timestamp,
+        SentTimestamp,
+        ReceivedTimestamp,
         MessageId,
-        Message,
+        MessageText,
+        Type, // Text, Photo, Audio
+        Class, // Message, Call, NewDay
         Status,
         ForwardFrom,
         ForwardTimestamp,
@@ -108,16 +174,29 @@ public:
     };
 
     enum class Role {
-        Identifier,
+        EntityType, // Message, Call, NewDay
+        MessageType, // Text, Photo, Audio
+        Timestamp, // For local events, such as NewDay
+        SentTimestamp,
+        ReceivedTimestamp,
+        Identifier, // Message ID
         Peer,
         Message,
-        Count,
+        NewDay,
+        ActionType, // Service action type, such as Partici
+        Actor,
+        Users,
+        PreviousEntry,
+        NextEntry,
+        Count, // Roles count
         Invalid = Count,
     };
     Q_ENUM(Role)
 
     explicit MessagesModel(QObject *parent = nullptr);
     void setContactsModel(ContactsModel *model);
+
+    QHash<int, QByteArray> roleNames() const override;
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -127,12 +206,15 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QVariant getData(int index, Role role) const;
+    QVariant getSiblingEntryData(int index) const;
     //const SMessage *messageAt(quint32 messageIndex) const;
 
     //int messageIndex(quint64 messageId) const; // Messages id should be quint32, but it require "outgoing random to incremental message id resolving" (Not implemented yet).
 
+    Peer peer() const { return m_peer; }
+
 public slots:
-    //void addMessage(const SMessage &message);
+    void addMessages(const QVector<BrainIM::Message> &messages);
     //void onFileRequestComplete(const QString &uniqueId);
     //int setMessageMediaData(quint64 messageId, const QVariant &data);
     //void setMessageRead(Telegram::Peer peer, quint32 messageId, bool out);
@@ -140,15 +222,24 @@ public slots:
     //void setMessageOutboxRead(Telegram::Peer peer, quint32 messageId);
     //void setResolvedMessageId(quint64 randomId, quint32 resolvedId);
     void clear();
+    void setPeer(const Peer peer);
+
+    void populate();
+
+signals:
+    void classChanged();
+    void peerChanged(Peer peer);
 
 private:
     static Role intToRole(int value);
     static Column intToColumn(int value);
     static Role indexToRole(const QModelIndex &index, int role = Qt::DisplayRole);
+    QString roleToName(Role role) const;
 
     ContactsModel *m_contactsModel = nullptr;
-    QVector<Message*> m_messages;
+    QVector<Event*> m_events;
     QHash<QString,quint64> m_fileRequests; // uniqueId to messageId
+    Peer m_peer;
 
 };
 
@@ -159,5 +250,9 @@ inline int MessagesModel::columnCount(const QModelIndex &parent) const
 }
 
 } // BrainIM namespace
+
+Q_DECLARE_METATYPE(BrainIM::Message)
+//Q_DECLARE_METATYPE(BrainIM::MessageEntity)
+//Q_DECLARE_METATYPE(BrainIM::MessagesModel::Entity)
 
 #endif // BRAIN_IM_MESSAGES_MODEL_HPP

@@ -1,5 +1,7 @@
-#ifndef PEERSMODEL_HPP
-#define PEERSMODEL_HPP
+#ifndef BRAIN_IM_PEERS_MODEL_HPP
+#define BRAIN_IM_PEERS_MODEL_HPP
+
+#include "global.h"
 
 #include <QObject>
 #include <QAbstractListModel>
@@ -10,7 +12,7 @@
 
 namespace BrainIM {
 
-class PeersModel : public QAbstractListModel
+class BRAIN_IM_EXPORT PeersModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
@@ -25,4 +27,4 @@ signals:
 
 } // BrainIM namespace
 
-#endif // PEERSMODEL_HPP
+#endif // BRAIN_IM_PEERS_MODEL_HPP
