@@ -140,6 +140,8 @@ int main(int argc, char *argv[])
 //    QApplication app(argc, argv);
     QGuiApplication app(argc, argv);
 
+    Tp::registerTypes();
+
     const char *uri = "BrainIM";
     const char *tpUri = "BrainIM.Telepathy";
     qRegisterMetaType<BrainIM::Peer>("BrainIM::Peer");
@@ -173,8 +175,6 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("main.qml")));
-
-    Tp::registerTypes();
 
     return app.exec();
 }
