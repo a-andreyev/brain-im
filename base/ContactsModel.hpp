@@ -71,6 +71,8 @@ public:
     // static QString getContactName(const Telegram::UserInfo &contact);
     // static QString getContactIdentifier(const Telegram::UserInfo &contact);
 
+    Q_INVOKABLE int indexOfPeer(const Peer peer) const;
+
 public slots:
     void addContact(quint32 id);
     bool removeContact(quint32 id);

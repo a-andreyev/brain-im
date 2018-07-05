@@ -383,6 +383,19 @@ QString ContactsModel::contactAt(int index, bool addName) const
 //    }
 }
 
+int ContactsModel::indexOfPeer(const Peer peer) const
+{
+    if (peer.type != Peer::Type::Contact) {
+        return -1;
+    }
+    for (int i = 0; i < m_contacts.count(); ++i) {
+        if (m_contacts.at(i)->id() == peer.id) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 //QString ContactsModel::formatName(const Telegram::UserInfo &info)
 //{
 //    QString name = info.firstName() + QLatin1Char(' ') + info.lastName();
