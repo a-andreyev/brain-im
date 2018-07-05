@@ -393,7 +393,7 @@ QString ContactsModel::contactAt(int index, bool addName) const
 //        return m_contacts.at(index).phone() + QLatin1Char(' ') + data(index, FullName).toString();
 //    } else {
 //        return m_contacts.at(index).phone();
-//    }
+        //    }
 }
 
 int ContactsModel::indexOfPeer(const Peer peer) const

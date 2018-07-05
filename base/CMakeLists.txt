@@ -15,6 +15,8 @@ set(base_sources
     AccountParameterModel
     AccountParameterModel.cpp
     AccountParameterModel.hpp
+    Approver.cpp
+    Approver.hpp
     ConnectionManagersModel
     ConnectionManagersModel.cpp
     ConnectionManagersModel.hpp
@@ -40,6 +42,17 @@ set(base_sources
     Types.hpp
     global.h
 )
+
+if (USE_TELEPATHY)
+    set(tp_sources
+        TelepathyMessagesModel.cpp
+        TelepathyMessagesModel.hpp
+    )
+    list(APPEND base_sources
+        ${tp_sources}
+    )
+    add_definitions(-DUSE_TELEPATHY)
+endif()
 
 add_definitions(-DBRAIN_IM_LIBRARY)
 add_library(BrainIM SHARED ${base_sources})

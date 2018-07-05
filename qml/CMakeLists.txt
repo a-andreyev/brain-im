@@ -2,6 +2,10 @@ project(QmlClient)
 
 #find_package(Qt5 REQUIRED COMPONENTS Core Network DBus Xml Gui Qml Quick)
 
+if (USE_TELEPATHY)
+    add_definitions(-DUSE_TELEPATHY)
+endif()
+
 set(brain_qml_SOURCES
     main.cpp
     main.qml

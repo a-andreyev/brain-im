@@ -16,10 +16,14 @@ option(DEVELOPER_BUILD "Enable extra debug codepaths, like asserts and extra out
 option(ENABLE_WIDGETS "Enable extra debug codepaths, like asserts and extra output" FALSE)
 option(ENABLE_QML "Enable extra debug codepaths, like asserts and extra output" TRUE)
 
+option(USE_TELEPATHY "Build with Telepathy support" TRUE)
+
 set(QT_VERSION_MAJOR "5")
 
 find_package(Qt5 REQUIRED COMPONENTS Core Network DBus Xml Gui Qml Quick Widgets)
-find_package(TelepathyQt5 0.9.6 REQUIRED)
+if (USE_TELEPATHY)
+    find_package(TelepathyQt5 0.9.6 REQUIRED)
+endif()
 
 #if(ENABLE_TESTAPP)
 #    find_package(Qt5 REQUIRED COMPONENTS Core Network Gui Widgets)
@@ -35,6 +39,6 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
 add_subdirectory(base)
 
-if(ENABLE_QML)
+if (ENABLE_QML)
     add_subdirectory(qml)
 endif()

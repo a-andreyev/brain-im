@@ -7,30 +7,24 @@ Item {
     id: messageDelegate
     height: contentHeight + previousEventSpacing + nextEventSpacing + details.anchors.topMargin + details.anchors.bottomMargin
     readonly property int contentHeight: {
-        var contentHeight = messageLabel.implicitHeight
-        if (nameLabel.visible) {
-            contentHeight += nameLabel.height
+        if (!pictureFrame.visible) {
+            return detailsColumn.height
         }
-        var pictureNeededHeight = 0
-        if (pictureFrame.visible) {
-            pictureNeededHeight = pictureFrame.height
-            if (pictureNeededHeight && messageDelegate.joinWithPrev) {
-                pictureNeededHeight -= nameLabel.height + defaultMargin * 2
-                if (pictureNeededHeight < 0) {
-                    pictureNeededHeight = 0
-                }
-            }
+        var pictureNeededHeight = pictureFrame.height
+        if (joinWithPrev) {
+            // We can use the space in previous message for picture.
+            // It is hard to get the exact available space, but there is at least the height of
+            // the peer name and one line of text (use double margin instead of line height for now)
+            pictureNeededHeight -= nameLabel.height + defaultMargin * 2
         }
-        return Math.max(pictureNeededHeight, contentHeight)
+        return Math.max(pictureNeededHeight, detailsColumn.height)
     }
 
     property var model
     property bool joinWithNext: typeof(model.nextMessage) != "undefined" && model.nextMessage.peer.id === model.peer.id
     property bool joinWithPrev: typeof(model.previousMessage) != "undefined" && model.previousMessage.peer.id === model.peer.id
 
-    property color backgroundColor: Material.color(Material.Green, Material.Shade100)
-    //property color backgroundColor: Material.color(Material.Blue, Material.Shade50)//"lightgreen"
-    //property color backgroundColor: Material.color(Material.Green, Material.Shade50)//"lightgreen"
+    property color backgroundColor: Material.color(Material.background, Material.theme === Material.Light ? Material.Shade200 : Material.ShadeA200)
 
     readonly property int defaultMargin: 8
     readonly property int halfMargin: defaultMargin / 2
@@ -73,9 +67,37 @@ Item {
 
             Rectangle {
                 id: picture
-                color: "black"
+                readonly property var colors: [
+                    Material.Purple,
+                    Material.DeepPurple,
+                    Material.Blue,
+                    Material.LightBlue,
+                    Material.Cyan,
+                    Material.Teal,
+                    Material.LightGreen,
+                    Material.Lime,
+                    Material.Amber,
+                    Material.Orange,
+                    Material.DeepOrange,
+                    Material.Brown,
+                    Material.Grey,
+                    Material.BlueGrey,
+                ]
+                function getColor(username) {
+                    return colors[Qt.md5(username).charCodeAt(0) % colors.length]
+                }
+
+                color: Material.color(getColor(messageDelegate.model.peer.id))
                 width: 48
                 height: 48
+                radius: defaultMargin
+
+                Text {
+                    anchors.centerIn: parent
+                    font.pixelSize: parent.width - defaultMargin
+                    text: messageDelegate.model.peer.id[0]
+                    font.capitalization: Font.AllUppercase
+                }
             }
         }
 

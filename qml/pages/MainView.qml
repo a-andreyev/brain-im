@@ -2,23 +2,31 @@ import QtQuick 2.9
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.3
 import BrainIM 0.1
+import BrainIM.Telepathy 0.1
 
 import "dialogs"
 import "messages"
 
 Page {
     id: mainScreen
+
+    property alias peer: messagesModel.peer
+
+    function showDialog(peer)
+    {
+        console.log("Show dialog with peer(" + peer.type + ", " + peer.id + ")")
+        peer = Brain.peer(peer.id, peer.type)
+    }
+
     Row {
         id: contentRoot
         anchors.fill: mainScreen.contentItem
         DialogView {
             id: dialogView
-            width: 400
+            width: 360
             height: parent.height
-            onActivateDialog: {
-                console.log("Activate dialog peer(" + peer.type + ", " + peer.id + ")")
-                messageView.peer = Brain.peer(peer.id, peer.type)
-            }
+            model: contactsModel
+            onActivateDialog: mainScreen.showDialog(peer)
         }
 
         Item {
@@ -26,16 +34,25 @@ Page {
             visible: width > 200
             width: parent.width - dialogView.width
             height: parent.height
+
+            MessageToolbar {
+                id: chatToolbar
+                anchors.top: parent.top
+                width: rightColumn.width
+                height: 48
+                z: 1
+            }
             MessageView {
                 id: messageView
-                peer: Brain.peerFromRoomId(1)
                 width: rightColumn.width
-                anchors.top: rightColumn.top
+                anchors.top: chatToolbar.bottom
                 anchors.bottom: messageEditor.top
+                model: messagesModel
+                onActivateDialog: mainScreen.showDialog(peer)
             }
             MessageEditor {
                 id: messageEditor
-                peer: messageView.peer
+                peer: mainScreen.peer
                 width: rightColumn.width
                 height: 64
                 anchors.bottom: rightColumn.bottom
@@ -51,5 +68,14 @@ Page {
             console.log("Message to " + typeText + " " + peer.id)
         }
         signal draftChanged(string message, var peer)
+    }
+
+
+    ContactsModel {
+        id: contactsModel
+    }
+
+    TelepathyMessagesModel {
+        id: messagesModel
     }
 }

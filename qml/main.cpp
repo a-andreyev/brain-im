@@ -3,7 +3,12 @@
 #include <QQmlApplicationEngine>
 #include <QtQml/qqml.h>
 #include <QTableView>
+
+#ifdef USE_TELEPATHY
+#include "TelepathyMessagesModel.hpp"
+
 #include <TelepathyQt/Types>
+#endif
 
 #include "AccountsModel"
 #include "AccountParameterModel"
@@ -136,6 +141,7 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     const char *uri = "BrainIM";
+    const char *tpUri = "BrainIM.Telepathy";
     qRegisterMetaType<BrainIM::Peer>("BrainIM::Peer");
     qmlRegisterType<AccountsModel>(uri, 0, 1, "AccountsModel");
     qmlRegisterType<ConnectionManagersModel>(uri, 0, 1, "ConnectionManagersModel");
@@ -144,6 +150,14 @@ int main(int argc, char *argv[])
     qmlRegisterType<MessageSender>(uri, 0, 1, "MessageSender");
     qmlRegisterType<BrainIM::ContactsModel>(uri, 0, 1, "ContactsModel");
     qmlRegisterType<BrainIM::MessagesModel>(uri, 0, 1, "MessagesModel");
+
+#ifdef USE_TELEPATHY
+    qmlRegisterType<BrainIM::TelepathyMessagesModel>(tpUri, 0, 1, "TelepathyMessagesModel");
+    qmlRegisterUncreatableType<Tp::Account>("TelepathyQt", 0, 1, "Account", "The class can be created only from C++");
+//    qmlRegisterUncreatableType<Tp::Profile>("TelepathyQt", 0, 1, "Profile", "The class can be created only from C++");
+#endif
+
+
     //qmlRegisterType<BrainIM::MessageEntity>(uri, 0, 1, "MessageEntity");
     qmlRegisterSingletonType<BrainIM::Brain>(uri, 0, 1, "Brain", &brain_provider);
 
@@ -156,9 +170,6 @@ int main(int argc, char *argv[])
     qmlRegisterUncreatableType<BrainIM::EventEnums>(uri, 0, 1, "Event", "The class can be created only from C++");
     qmlRegisterUncreatableType<BrainIM::MessageEnums>(uri, 0, 1, "Message", "The class can be created only from C++");
     qmlRegisterUncreatableType<BrainIM::ServiceActionEnums>(uri, 0, 1, "ServiceAction", "The class can be created only from C++");
-
-    qmlRegisterUncreatableType<Tp::Account>("TelepathyQt", 0, 1, "Account", "The class can be created only from C++");
-//    qmlRegisterUncreatableType<Tp::Profile>("TelepathyQt", 0, 1, "Profile", "The class can be created only from C++");
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("main.qml")));

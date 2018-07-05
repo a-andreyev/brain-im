@@ -1,6 +1,7 @@
 import QtQuick 2.9
 import QtQuick.Window 2.2
 import QtQuick.Controls 2.2
+import QtQuick.Controls.Material 2.0
 import QtQuick.Layouts 1.3
 
 import BrainIM 0.1
@@ -18,6 +19,10 @@ ApplicationWindow {
     title: "Brain IM"
 
     property alias subtitle: subtitleLabel.text
+
+    Material.theme: theme
+
+    property int theme: Material.Light
 
     header: ToolBar {
         ToolButton {
@@ -55,6 +60,17 @@ ApplicationWindow {
     Shortcut {
         sequence: "Menu"
         onActivated: optionsMenu.open()
+    }
+
+    Shortcut {
+        sequence: "F2"
+        onActivated: {
+            if (window.theme == Material.Light) {
+                window.theme = Material.Dark
+            } else {
+                window.theme = Material.Light
+            }
+        }
     }
 
     Shortcut {

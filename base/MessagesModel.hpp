@@ -1,7 +1,7 @@
 /*
-   Copyright (C) 2014-2017 Alexandr Akulich <akulichalexander@gmail.com>
+   Copyright (C) 2018 Alexandr Akulich <akulichalexander@gmail.com>
 
-   This file is a part of TelegramQt library.
+   This file is a part of BrainIM library.
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -28,6 +28,26 @@
 namespace BrainIM {
 
 class ContactsModel;
+
+struct BRAIN_IM_EXPORT CallEvent : public Event
+{
+    Q_GADGET
+    Q_PROPERTY(quint32 duration MEMBER duration)
+    Q_PROPERTY(QStringList participants MEMBER participants)
+public:
+    CallEvent();
+
+    const Peer peer() const { return m_peer; }
+    void setPeer(const Peer &peer) { m_peer = peer; }
+
+    QStringList participants;
+
+    quint32 id = 0;
+    quint32 timestamp = 0;
+    quint32 duration = 0;
+
+    Peer m_peer;
+};
 
 struct BRAIN_IM_EXPORT MessageEnums : public QObject
 {
@@ -69,7 +89,7 @@ public:
     Q_DECLARE_FLAGS(TypeFlags, Type)
 };
 
-struct BRAIN_IM_EXPORT Message : public Event
+struct BRAIN_IM_EXPORT MessageEvent : public Event
 {
     Q_GADGET
     Q_PROPERTY(QString text MEMBER text)
@@ -80,7 +100,7 @@ public:
     using Type = MessageEnums::Type;
     using TypeFlags = MessageEnums::TypeFlags;
 
-    Message();
+    MessageEvent();
 
     quint32 fromId = 0; // Sender handle
 
@@ -185,6 +205,7 @@ public:
         NewDay,
         ActionType, // Service action type, such as Partici
         Actor,
+        Duration, // Call duration
         Users,
         PreviousEntry,
         NextEntry,
@@ -207,14 +228,11 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QVariant getData(int index, Role role) const;
     QVariant getSiblingEntryData(int index) const;
-    //const SMessage *messageAt(quint32 messageIndex) const;
-
-    //int messageIndex(quint64 messageId) const; // Messages id should be quint32, but it require "outgoing random to incremental message id resolving" (Not implemented yet).
 
     Peer peer() const { return m_peer; }
 
 public slots:
-    void addMessages(const QVector<BrainIM::Message> &messages);
+    void addMessages(const QVector<BrainIM::MessageEvent> &messages);
     //void onFileRequestComplete(const QString &uniqueId);
     //int setMessageMediaData(quint64 messageId, const QVariant &data);
     //void setMessageRead(Telegram::Peer peer, quint32 messageId, bool out);
@@ -230,7 +248,7 @@ signals:
     void classChanged();
     void peerChanged(Peer peer);
 
-private:
+protected:
     static Role intToRole(int value);
     static Column intToColumn(int value);
     static Role indexToRole(const QModelIndex &index, int role = Qt::DisplayRole);
@@ -238,9 +256,7 @@ private:
 
     ContactsModel *m_contactsModel = nullptr;
     QVector<Event*> m_events;
-    QHash<QString,quint64> m_fileRequests; // uniqueId to messageId
     Peer m_peer;
-
 };
 
 inline int MessagesModel::columnCount(const QModelIndex &parent) const
@@ -251,7 +267,7 @@ inline int MessagesModel::columnCount(const QModelIndex &parent) const
 
 } // BrainIM namespace
 
-Q_DECLARE_METATYPE(BrainIM::Message)
+Q_DECLARE_METATYPE(BrainIM::MessageEvent)
 //Q_DECLARE_METATYPE(BrainIM::MessageEntity)
 //Q_DECLARE_METATYPE(BrainIM::MessagesModel::Entity)
 

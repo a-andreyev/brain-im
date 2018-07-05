@@ -188,10 +188,10 @@ QVariant MessagesModel::getData(int index, Role role) const
 
     union {
         const Event *event;
-        const Message *message;
+        const MessageEvent *message;
         const ServiceAction *serviceAction;
         const NewDayAction *newDay;
-        //const Call *call;
+        const CallEvent *call;
         //const FileTransfer *fileTransfer;
     };
     event = m_events.at(index);
@@ -242,6 +242,17 @@ QVariant MessagesModel::getData(int index, Role role) const
         default:
             return QVariant();
         }
+    case Event::Type::Call:
+        switch (role) {
+        case Role::Timestamp:
+            return QVariant::fromValue(QDateTime::fromSecsSinceEpoch(call->timestamp));
+        case Role::Peer:
+            return QVariant::fromValue(call->peer());
+        case Role::Duration:
+            return QVariant::fromValue(QTime().addSecs(call->duration));
+        default:
+            return QVariant();
+        }
     default:
         return QVariant();
     }
@@ -258,7 +269,7 @@ QVariant MessagesModel::getSiblingEntryData(int index) const
 
     union {
         const Event *event;
-        const Message *message;
+        const MessageEvent *message;
         const ServiceAction *serviceAction;
         const NewDayAction *newDay;
         //const Call *call;
@@ -301,7 +312,7 @@ QVariant MessagesModel::getSiblingEntryData(int index) const
 //    return -1;
 //}
 
-void MessagesModel::addMessages(const QVector<BrainIM::Message> &messages)
+void MessagesModel::addMessages(const QVector<BrainIM::MessageEvent> &messages)
 {
 //    Telegram::MessageMediaInfo mediaInfo;
 //    Telegram::RemoteFile fileInfo;
@@ -346,12 +357,13 @@ void MessagesModel::addMessages(const QVector<BrainIM::Message> &messages)
 //            return;
 //        }
 //    }
-//    beginInsertRows(QModelIndex(), m_messages.count(), m_messages.count());
+    int newRow = m_events.count();
+    beginInsertRows(QModelIndex(), newRow, newRow);
 //    m_messages.append(processedMessage);
 //    if (!m_messages.last().timestamp) {
 //        m_messages.last().timestamp = QDateTime::currentMSecsSinceEpoch() / 1000;
 //    }
-//    endInsertRows();
+    endInsertRows();
 
 //    if (needFileData) {
 //        const quint64 id = message.id ? message.id : message.id64;
@@ -489,7 +501,7 @@ void MessagesModel::populate()
     }
 
     {
-        Message *event = new BrainIM::Message();
+        MessageEvent *event = new BrainIM::MessageEvent();
         event->setPeer(Peer(QStringLiteral("andy"), Peer::Type::Contact));
         event->text = QStringLiteral("Well, I don't know about that.");
         event->receivedTimestamp = QDateTime::currentDateTimeUtc().toSecsSinceEpoch() - 60 * 60 * 24 * 1.1; // Two days ago
@@ -498,9 +510,8 @@ void MessagesModel::populate()
     }
 
     {
-        Message *event = new BrainIM::Message();
+        MessageEvent *event = new BrainIM::MessageEvent();
         event->setPeer(Peer(QStringLiteral("daniel"), Peer::Type::Contact));
-        event->type = Event::Type::Message;
         event->text = QStringLiteral("It's a joke we were joking around, you see?");
         event->receivedTimestamp = QDateTime::currentDateTimeUtc().toSecsSinceEpoch() - 120;
         event->sentTimestamp = event->receivedTimestamp - 10;
@@ -508,9 +519,8 @@ void MessagesModel::populate()
     }
 
     {
-        Message *event = new BrainIM::Message();
+        MessageEvent *event = new BrainIM::MessageEvent();
         event->setPeer(Peer(QStringLiteral("daniel"), Peer::Type::Contact));
-        event->type = Event::Type::Message;
         event->text = QStringLiteral("We totally got you!");
         event->receivedTimestamp = QDateTime::currentDateTimeUtc().toSecsSinceEpoch();
         event->sentTimestamp = event->receivedTimestamp - 10;
@@ -527,11 +537,26 @@ void MessagesModel::populate()
     }
 
     {
-        Message *event = new BrainIM::Message();
-        event->type = Event::Type::Message;
+        MessageEvent *event = new BrainIM::MessageEvent();
         event->setPeer(Peer(QStringLiteral("daniel"), Peer::Type::Contact));
         event->text = QStringLiteral("We work hard, we play hard");
         event->receivedTimestamp = QDateTime::currentDateTimeUtc().toSecsSinceEpoch();
+        event->sentTimestamp = event->receivedTimestamp;
+        m_events << event;
+    }
+
+    {
+        CallEvent *event = new BrainIM::CallEvent();
+        event->setPeer(Peer(QStringLiteral("daniel"), Peer::Type::Contact));
+        event->duration = 68;
+    }
+
+    {
+        MessageEvent *event = new BrainIM::MessageEvent();
+        event->type = Event::Type::Message;
+        event->setPeer(Peer(QStringLiteral("russel"), Peer::Type::Contact));
+        event->text = QStringLiteral("Please, show me something new!");
+        event->receivedTimestamp = QDateTime::currentDateTimeUtc().toSecsSinceEpoch() + 10;
         event->sentTimestamp = event->receivedTimestamp;
         m_events << event;
     }
@@ -595,10 +620,16 @@ QString MessagesModel::roleToName(MessagesModel::Role role) const
     return names.value(static_cast<int>(role));
 }
 
-Message::Message() :
+MessageEvent::MessageEvent() :
     Event()
 {
     type = Event::Type::Message;
+}
+
+CallEvent::CallEvent() :
+    Event()
+{
+    type = Event::Type::Call;
 }
 
 } // BrainIM namespace

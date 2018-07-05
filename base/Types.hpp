@@ -68,7 +68,7 @@ public:
 struct BRAIN_IM_EXPORT Peer
 {
     Q_GADGET
-    Q_PROPERTY(Type type MEMBER type)
+    Q_PROPERTY(int type READ typeInt WRITE setTypeInt)
     Q_PROPERTY(QString id MEMBER id)
 public:
     using Type = PeerEnums::Type;
@@ -83,6 +83,8 @@ public:
     QString id;
 
     Q_INVOKABLE bool isValid() const { return (type != Type::Invalid) && id.isEmpty(); }
+    int typeInt() const { return static_cast<int>(type); }
+    void setTypeInt(int t) { type = static_cast<Type>(t); }
 
     bool operator==(const Peer &p) const
     {
