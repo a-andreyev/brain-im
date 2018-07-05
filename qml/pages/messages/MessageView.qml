@@ -31,6 +31,7 @@ Frame {
                 }
             }
         }
+        ScrollBar.vertical: ScrollBar {}
     }
 
     Component {
