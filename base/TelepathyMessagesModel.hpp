@@ -19,6 +19,13 @@
 #define BRAIN_IM_TELEPATHY_MESSAGES_MODEL_HPP
 
 #include "MessagesModel.hpp"
+#include <TelepathyQt/TextChannel>
+
+namespace Tp {
+
+class PendingOperation;
+
+} // Telepathy namespace
 
 namespace BrainIM {
 
@@ -28,10 +35,20 @@ class BRAIN_IM_EXPORT TelepathyMessagesModel : public MessagesModel
 public:
     explicit TelepathyMessagesModel(QObject *parent = nullptr);
 
-    void setChannel();
+    void setChannel(const Tp::ChannelPtr &channel);
+
+public slots:
+    void setPeerContact(Tp::ContactPtr contact);
+
+protected slots:
+    void setChannelRequest(Tp::ChannelRequestPtr request);
+    void onChannelReady(Tp::PendingOperation *op);
 
 protected:
     void onPeerChanged(const Peer peer);
+    void onMessageReceived(const Tp::ReceivedMessage &message);
+
+    Tp::TextChannelPtr m_channel;
 
 };
 

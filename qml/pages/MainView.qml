@@ -15,7 +15,9 @@ Page {
     function showDialog(peer)
     {
         console.log("Show dialog with peer(" + peer.type + ", " + peer.id + ")")
-        peer = Brain.peer(peer.id, peer.type)
+        var p = Brain.peer(peer.id, peer.type)
+        var index = contactsModel.indexOfPeer(p)
+        messagesModel.setPeerContact(contactsModel.contactAt(index))
     }
 
     Row {

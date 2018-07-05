@@ -23,8 +23,7 @@ CorePrivate::CorePrivate()
     m_accountFactory = Tp::AccountFactory::create(QDBusConnection::sessionBus(),
                                                   Tp::Features()
                                                   << Tp::Account::FeatureCore
-                                                  << Tp::Account::FeatureCapabilities
-                                                  << Tp::Account::FeatureProfile);
+                                                  );
 
     m_connectionFactory = Tp::ConnectionFactory::create(QDBusConnection::sessionBus(),
                                                         Tp::Features()

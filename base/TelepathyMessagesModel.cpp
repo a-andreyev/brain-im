@@ -19,8 +19,17 @@
 #include "Core.hpp"
 
 #include <TelepathyQt/Account>
+#include <TelepathyQt/AccountManager>
+#include <TelepathyQt/Contact>
+#include <TelepathyQt/ContactManager>
+#include <TelepathyQt/PendingChannel>
+#include <TelepathyQt/PendingChannelRequest>
+#include <TelepathyQt/PendingReady>
+#include <TelepathyQt/ReceivedMessage>
+#include <TelepathyQt/TextChannel>
 
 #include <QLoggingCategory>
+
 
 namespace BrainIM {
 
@@ -30,32 +39,106 @@ TelepathyMessagesModel::TelepathyMessagesModel(QObject *parent) :
     connect(this, &MessagesModel::peerChanged, this, &TelepathyMessagesModel::onPeerChanged);
 }
 
-void TelepathyMessagesModel::setChannel()
+void TelepathyMessagesModel::setChannel(const Tp::ChannelPtr &channel)
 {
-    //Tp::ContactPtr contact = contactManager();
-    //Tp::Account *acc;
-    //acc->ensureTextChat()
+    qWarning() << Q_FUNC_INFO << channel.data();
+    if (!channel) {
+        qWarning() << Q_FUNC_INFO << "no channel given";
+        return;
+    }
+    m_channel = Tp::TextChannelPtr::dynamicCast(channel);
+    if (!m_channel) {
+        qWarning() << Q_FUNC_INFO << "the channel is not message channel";
+        return;
+    }
+    connect(m_channel.data(), &Tp::TextChannel::messageReceived, this, &TelepathyMessagesModel::onMessageReceived);
+    qWarning() << Q_FUNC_INFO << m_channel->supportedMessageTypes();
+    if (channel->isReady()) {
+        qWarning() << Q_FUNC_INFO << "Already ready";
+        onChannelReady(nullptr);
+    } else {
+        qWarning() << Q_FUNC_INFO << "Become ready";
+        connect(channel->becomeReady(Tp::TextChannel::FeatureMessageCapabilities), &Tp::PendingOperation::finished, this, &TelepathyMessagesModel::onChannelReady);
+    }
+}
+
+void TelepathyMessagesModel::setPeerContact(Tp::ContactPtr contact)
+{
+    clear();
+
+    qWarning() << Q_FUNC_INFO << contact.data() << contact->alias();
+
+    const QString accountId = contact->manager()->connection()->accountUniqueIdentifier();
+    qWarning() << Q_FUNC_INFO << "needed acc" << accountId;
+
+    const auto accounts = BrainIM::accountManager()->allAccounts();
+    if (accounts.isEmpty()) {
+        qWarning() << Q_FUNC_INFO << "not accounts";
+        return;
+    }
+    for (Tp::AccountPtr account : accounts) {
+        if (account->uniqueIdentifier() != accountId) {
+            continue;
+        }
+        Tp::PendingChannel *request = account->ensureAndHandleTextChat(contact);
+        connect(request, &Tp::PendingOperation::finished, this, [this](Tp::PendingOperation *operation) {
+            Tp::PendingChannel *request = qobject_cast<Tp::PendingChannel *>(operation);
+            if (!request) {
+                qWarning() << Q_FUNC_INFO << "Invalid call";
+                return;
+            }
+            setChannel(request->channel());
+        });
+
+        // Tp::PendingChannelRequest *request = account->ensureTextChat(contact);
+
+        // connect(request, &Tp::PendingOperation::finished, this, [this](Tp::PendingOperation *operation) {
+        //     Tp::PendingChannelRequest *request = qobject_cast<Tp::PendingChannelRequest *>(operation);
+        //     if (!request) {
+        //         qWarning() << Q_FUNC_INFO << "Invalid call";
+        //         return;
+        //     }
+
+        //     setChannelRequest(request->channelRequest());
+        // });
+        return;
+    }
+    qWarning() << Q_FUNC_INFO << "no needed account";
+}
+
+void TelepathyMessagesModel::setChannelRequest(Tp::ChannelRequestPtr request)
+{
+    connect(request.data(), &Tp::ChannelRequest::succeeded, this, &TelepathyMessagesModel::setChannel);
+}
+
+void TelepathyMessagesModel::onChannelReady(Tp::PendingOperation *op)
+{
+    Q_UNUSED(op)
+
+    qWarning() << m_channel->targetId() << m_channel->interfaces();
+    //m_channel->messageReceived();
 }
 
 void TelepathyMessagesModel::onPeerChanged(const Peer peer)
 {
     qWarning() << Q_FUNC_INFO;
     Q_UNUSED(peer)
+}
 
+void TelepathyMessagesModel::onMessageReceived(const Tp::ReceivedMessage &message)
+{
+    qWarning() << Q_FUNC_INFO << message.text();
+    {
+        MessageEvent *event = new BrainIM::MessageEvent();
+        event->setPeer(Peer(message.sender()->id(), Peer::Type::Contact));
+        event->text = message.text();
+        event->receivedTimestamp = message.receivedTimestamp();
+        event->sentTimestamp = message.sentTimestamp();
 
-    if (m_events.isEmpty()) {
-        return;
+        beginInsertRows(QModelIndex(), m_events.count(), m_events.count());
+        m_events << event;
+        endInsertRows();
     }
-
-    beginRemoveRows(QModelIndex(), 0, m_events.count() - 1);
-//    beginResetModel();
-    m_events.clear();
-//    qWarning() << "before reset end";
-    endRemoveRows();
-//    endResetModel();
-
-//    QTimer::singleShot(500, this, SLOT(populate()));
-
 }
 
 } // BrainIM namespace

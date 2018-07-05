@@ -459,7 +459,11 @@ void MessagesModel::addMessages(const QVector<BrainIM::MessageEvent> &messages)
 
 void MessagesModel::clear()
 {
-    beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
+    if (m_events.isEmpty()) {
+        return;
+    }
+
+    beginRemoveRows(QModelIndex(), 0, m_events.count() - 1);
     m_events.clear();
     endRemoveRows();
 }

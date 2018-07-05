@@ -145,6 +145,7 @@ int main(int argc, char *argv[])
     const char *uri = "BrainIM";
     const char *tpUri = "BrainIM.Telepathy";
     qRegisterMetaType<BrainIM::Peer>("BrainIM::Peer");
+
     qmlRegisterType<AccountsModel>(uri, 0, 1, "AccountsModel");
     qmlRegisterType<ConnectionManagersModel>(uri, 0, 1, "ConnectionManagersModel");
     qmlRegisterType<ProtocolsModel>(uri, 0, 1, "ProtocolsModel");
@@ -155,10 +156,12 @@ int main(int argc, char *argv[])
 
 #ifdef USE_TELEPATHY
     qmlRegisterType<BrainIM::TelepathyMessagesModel>(tpUri, 0, 1, "TelepathyMessagesModel");
+    qmlRegisterUncreatableType<Tp::Contact>("TelepathyQt", 0, 1, "Contact", "The class can be created only from C++");
     qmlRegisterUncreatableType<Tp::Account>("TelepathyQt", 0, 1, "Account", "The class can be created only from C++");
 //    qmlRegisterUncreatableType<Tp::Profile>("TelepathyQt", 0, 1, "Profile", "The class can be created only from C++");
+     //qRegisterMetaType<Tp::ContactPtr>("TelepathyQt", 0, 1, "ContactPtr", "The class can be created only from C++");
+    qRegisterMetaType<Tp::ContactPtr>("Tp::ContactPtr");
 #endif
-
 
     //qmlRegisterType<BrainIM::MessageEntity>(uri, 0, 1, "MessageEntity");
     qmlRegisterSingletonType<BrainIM::Brain>(uri, 0, 1, "Brain", &brain_provider);

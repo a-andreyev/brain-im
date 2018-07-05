@@ -18,6 +18,17 @@ option(ENABLE_QML "Enable extra debug codepaths, like asserts and extra output" 
 
 option(USE_TELEPATHY "Build with Telepathy support" TRUE)
 
+find_package(Qt5 CONFIG REQUIRED COMPONENTS
+    Core
+    DBus
+    Gui
+    Network
+    Qml
+    Quick
+    Xml
+    Widgets
+)
+
 set(QT_VERSION_MAJOR "5")
 
 find_package(Qt5 REQUIRED COMPONENTS Core Network DBus Xml Gui Qml Quick Widgets)
@@ -25,13 +36,9 @@ if (USE_TELEPATHY)
     find_package(TelepathyQt5 0.9.6 REQUIRED)
     set(TELEPATHY_QT_VERSION ${TELEPATHY_QT5_VERSION})
     set(TELEPATHY_QT_INSTALL_DIR ${TELEPATHY_QT5_INSTALL_DIR})
+    set(TELEPATHY_QT_INCLUDE_DIR ${TELEPATHY_QT5_INCLUDE_DIR})
+    set(TELEPATHY_QT_LIBRARIES ${TELEPATHY_QT5_LIBRARIES})
 endif()
-
-#if(ENABLE_TESTAPP)
-#    find_package(Qt5 REQUIRED COMPONENTS Core Network Gui Widgets)
-#else()
-#    find_package(Qt5 REQUIRED COMPONENTS Core Network)
-#endif()
 
 include(GNUInstallDirs)
 

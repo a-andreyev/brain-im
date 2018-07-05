@@ -61,8 +61,7 @@ public:
     int indexOfContact(const Peer phone) const;
 
     bool hasContact(quint32 contactId) const;
-    Tp::ContactPtr contactAt(int index) const;
-    //const Tp::Contact getContact(quint32 id) const;
+    Q_INVOKABLE Tp::ContactPtr contactAt(int index) const;
 
     QVector<Tp::ContactPtr> contacts() const;
     QString contactAt(int index, bool addName) const;
@@ -71,7 +70,7 @@ public:
     // static QString getContactName(const Telegram::UserInfo &contact);
     // static QString getContactIdentifier(const Telegram::UserInfo &contact);
 
-    Q_INVOKABLE int indexOfPeer(const Peer peer) const;
+    Q_INVOKABLE int indexOfPeer(const BrainIM::Peer peer) const;
 
 public slots:
     void addContact(quint32 id);

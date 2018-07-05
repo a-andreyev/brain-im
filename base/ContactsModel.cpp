@@ -365,7 +365,8 @@ Tp::ContactPtr ContactsModel::contactAt(int index) const
         return Tp::ContactPtr();
     }
 
-    return m_contacts[index];
+    qWarning() << Q_FUNC_INFO << "return" << index << m_contacts.at(index).data() << m_contacts.at(index).data()->alias();
+    return m_contacts.at(index);
 }
 
 //const SContact *ContactsModel::getContact(quint32 id) const
