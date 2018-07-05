@@ -1,5 +1,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
+import QtQuick.Controls.Material 2.0
 import BrainIM 0.1
 
 Item {
@@ -42,9 +43,8 @@ Item {
         anchors.centerIn: parent
         width: metrics.width + 20
         height: metrics.height + 10
-        //color: Theme.highlightBackgroundColor
         radius: 10
-        color: "lightblue"
+        color: Material.color(Material.background, Material.theme === Material.Light ? Material.Shade100 : Material.Shade800)
     }
 
     Label {
