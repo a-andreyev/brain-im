@@ -1,30 +1,67 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.2
+import QtQuick.Controls.Material 2.0
 
 ItemDelegate {
     id: dialogDelegate
     height: 64
     width: 200
     property int margin: (pictureFrame.width - picture.width) / 2
-    Rectangle {
-        border.color: "black"
-        border.width: 1
+    readonly property int defaultMargin: 8
+
+    Item {
+        //border.color: "black"
+        //border.width: 1
         id: pictureFrame
-        height: parent.height
+        height: picture.height
         width: height
+
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: dialogDelegate.left
+        anchors.leftMargin: defaultMargin
 
         Rectangle {
             id: picture
-            color: "black"
+            readonly property var colors: [
+                Material.Purple,
+                Material.DeepPurple,
+                Material.Blue,
+                Material.LightBlue,
+                Material.Cyan,
+                Material.Teal,
+                Material.LightGreen,
+                Material.Lime,
+                Material.Amber,
+                Material.Orange,
+                Material.DeepOrange,
+                Material.Brown,
+                Material.Grey,
+                Material.BlueGrey,
+            ]
+            function getColor(username) {
+                return colors[Qt.md5(username).charCodeAt(0) % colors.length]
+            }
+
+            color: Material.color(getColor(nameLabel.text))
             width: 48
-            height: width
-            anchors.centerIn: pictureFrame
+            height: 48
+            radius: defaultMargin
+
+            Text {
+                anchors.centerIn: parent
+                font.pixelSize: parent.width - defaultMargin
+                text: nameLabel.text[0]
+                font.capitalization: Font.AllUppercase
+            }
         }
     }
+
     Row {
+        anchors.leftMargin: defaultMargin
         anchors.left: pictureFrame.right
         anchors.verticalCenter: parent.verticalCenter
         Label {
+            id: nameLabel
             text: model.alias
         }
     }
