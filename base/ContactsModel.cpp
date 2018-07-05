@@ -236,16 +236,29 @@ void ContactsModel::onAMReady()
         qWarning() << Q_FUNC_INFO << "no account manager";
         return;
     }
-    QList<Tp::AccountPtr> onlines = manager->allAccounts();
-    if (onlines.isEmpty()) {
-        qWarning() << Q_FUNC_INFO << "no online accounts";
+    QList<Tp::AccountPtr> accounts = manager->allAccounts();
+    if (accounts.isEmpty()) {
+        qWarning() << Q_FUNC_INFO << "no accounts";
         return;
     }
-    Tp::AccountPtr acc = onlines.first();
+    const int onlineIndex = [](const QList<Tp::AccountPtr> &accounts) {
+        for (int i = 0; i < accounts.count(); ++i) {
+            if (accounts.at(i).data()->isOnline()) {
+                return i;
+            }
+        }
+        return -1;
+    } (accounts);
+    if (onlineIndex < 0) {
+        qWarning() << Q_FUNC_INFO << "no online account";
+        return;
+    }
+
+    Tp::AccountPtr acc = accounts.at(onlineIndex);
     Tp::ConnectionPtr conn = acc->connection();
     if (!conn) {
         qWarning() << Q_FUNC_INFO << "no account connection";
-        //QTimer::singleShot(200, this, &ContactsModel::onAMReady);
+        QTimer::singleShot(200, this, &ContactsModel::onAMReady);
         return;
     }
     Tp::ContactManagerPtr connContacts = conn->contactManager();
