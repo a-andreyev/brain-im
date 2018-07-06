@@ -2,7 +2,6 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QtQml/qqml.h>
-#include <QTableView>
 
 #ifdef USE_TELEPATHY
 #include "TelepathyMessagesModel.hpp"
@@ -154,12 +153,14 @@ int main(int argc, char *argv[])
     qmlRegisterType<BrainIM::ContactsModel>(uri, 0, 1, "ContactsModel");
     qmlRegisterType<BrainIM::MessagesModel>(uri, 0, 1, "MessagesModel");
 
+    const QString cppOnlyClass = QStringLiteral("The class can be created only from C++");
+
 #ifdef USE_TELEPATHY
     qmlRegisterType<BrainIM::TelepathyMessagesModel>(tpUri, 0, 1, "TelepathyMessagesModel");
-    qmlRegisterUncreatableType<Tp::Contact>("TelepathyQt", 0, 1, "Contact", "The class can be created only from C++");
-    qmlRegisterUncreatableType<Tp::Account>("TelepathyQt", 0, 1, "Account", "The class can be created only from C++");
-//    qmlRegisterUncreatableType<Tp::Profile>("TelepathyQt", 0, 1, "Profile", "The class can be created only from C++");
-     //qRegisterMetaType<Tp::ContactPtr>("TelepathyQt", 0, 1, "ContactPtr", "The class can be created only from C++");
+    qmlRegisterUncreatableType<Tp::Contact>("TelepathyQt", 0, 1, "Contact", cppOnlyClass);
+    qmlRegisterUncreatableType<Tp::Account>("TelepathyQt", 0, 1, "Account", cppOnlyClass);
+//    qmlRegisterUncreatableType<Tp::Profile>("TelepathyQt", 0, 1, "Profile", cppOnlyClass);
+     //qRegisterMetaType<Tp::ContactPtr>("TelepathyQt", 0, 1, "ContactPtr", cppOnlyClass);
     qRegisterMetaType<Tp::ContactPtr>("Tp::ContactPtr");
 #endif
 
@@ -169,12 +170,12 @@ int main(int argc, char *argv[])
     qmlRegisterUncreatableMetaObject(BrainIM::staticMetaObject,
                                      uri, 0, 1,                 // major and minor version of the import
                                      "BrainIM",            // name in QML
-                                     "Error: only enums"); // error in case someone tries to create a MyNamespace object
+                                     QLatin1String("Error: only enums")); // error in case someone tried to create the 'namespace' object
 
-    qmlRegisterUncreatableType<BrainIM::PeerEnums>(uri, 0, 1, "Peer", "The class can be created only from C++");
-    qmlRegisterUncreatableType<BrainIM::EventEnums>(uri, 0, 1, "Event", "The class can be created only from C++");
-    qmlRegisterUncreatableType<BrainIM::MessageEnums>(uri, 0, 1, "Message", "The class can be created only from C++");
-    qmlRegisterUncreatableType<BrainIM::ServiceActionEnums>(uri, 0, 1, "ServiceAction", "The class can be created only from C++");
+    qmlRegisterUncreatableType<BrainIM::PeerEnums>(uri, 0, 1, "Peer", cppOnlyClass);
+    qmlRegisterUncreatableType<BrainIM::EventEnums>(uri, 0, 1, "Event", cppOnlyClass);
+    qmlRegisterUncreatableType<BrainIM::MessageEnums>(uri, 0, 1, "Message", cppOnlyClass);
+    qmlRegisterUncreatableType<BrainIM::ServiceActionEnums>(uri, 0, 1, "ServiceAction", cppOnlyClass);
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("main.qml")));
