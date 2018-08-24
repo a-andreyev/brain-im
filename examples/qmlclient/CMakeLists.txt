@@ -13,16 +13,6 @@ set(brain_qml_SOURCES
     pages/AccountManagement.qml
     pages/IndexPage.qml
     pages/MainView.qml
-    pages/accounts/AccountEditor.qml
-    pages/accounts/AccountView.qml
-    pages/accounts/ConnectionManagerView.qml
-    pages/accounts/ProtocolView.qml
-    pages/dialogs/DialogDelegate.qml
-    pages/dialogs/DialogView.qml
-    pages/messages/MessageDelegate.qml
-    pages/messages/MessageEditor.qml
-    pages/messages/MessageView.qml
-    pages/messages/ServiceMessageDelegate.qml
 )
 
 add_executable(brain_im ${brain_qml_SOURCES})
@@ -32,7 +22,7 @@ set_target_properties(brain_im PROPERTIES AUTOMOC TRUE)
 target_include_directories(brain_im PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/../base
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../src/brain-im
 
     ${TELEPATHY_QT_INCLUDE_DIR}
 )
@@ -47,3 +37,9 @@ target_link_libraries(brain_im
     ${TELEPATHY_QT_LIBRARIES}
     BrainIM
 )
+
+if (NOT INSTALL_QML_IMPORT_DIR)
+    set(INSTALL_QML_IMPORT_DIR ${CMAKE_INSTALL_LIBDIR}/qt5/qml)
+endif()
+
+set(QML_IMPORT_PATH ${INSTALL_QML_IMPORT_DIR})

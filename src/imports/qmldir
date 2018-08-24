@@ -1,0 +1,10 @@
+module BrainIM
+plugin BrainIMQml
+classname BrainIMQmlPlugin
+
+AccountEditor 0.1 AccountEditor.qml
+MessageDelegate 0.1 MessageDelegate.qml
+MessageEditor 0.1 MessageEditor.qml
+MessageToolbar 0.1 MessageToolbar.qml
+MessageView 0.1 MessageView.qml
+DialogView 0.1 DialogView.qml

@@ -6,7 +6,6 @@
 #include <QList>
 #include <QStringList>
 #include <QSet>
-#include <TelepathyQt/Contact>
 
 #include "PeersModel.hpp"
 
@@ -47,8 +46,8 @@ public:
 
     QHash<int, QByteArray> roleNames() const override;
 
-    bool hasPeer(const Peer peer) const override;
-    QString getName(const Peer peer) const override;
+    bool hasPeer(const BrainIM::Peer peer) const override;
+    QString getName(const BrainIM::Peer peer) const override;
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -58,12 +57,11 @@ public:
     QVariant getData(int contactIndex, Role role) const;
 
     int indexOfContact(const QString &id) const;
-    int indexOfContact(const Peer phone) const;
+    int indexOfContact(const BrainIM::Peer phone) const;
 
     bool hasContact(quint32 contactId) const;
-    Q_INVOKABLE Tp::ContactPtr contactAt(int index) const;
 
-    QVector<Tp::ContactPtr> contacts() const;
+    QVector<Contact> contacts() const;
     QString contactAt(int index, bool addName) const;
 
     // static QString formatName(const Telegram::UserInfo &info);
@@ -80,14 +78,14 @@ public slots:
 
     void clear();
 
+    void populate();
+
 protected slots:
     void onContactProfileChanged(quint32 id);
     void onContactStatusChanged(quint32 id);
 
 protected:
     //void updatePeerPicture(const PeerPicture &picture) override;
-
-    void onAMReady();
 
 private:
     static Role intToRole(int value);
@@ -97,7 +95,7 @@ private:
     void addContactId(quint32 id);
     QString contactStatusStr(const SContact &contact) const;
 
-    QVector<Tp::ContactPtr> m_contacts;
+    QVector<Contact> m_contacts;
 };
 
 inline int ContactsModel::columnCount(const QModelIndex &parent) const

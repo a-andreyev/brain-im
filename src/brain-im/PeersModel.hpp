@@ -18,8 +18,8 @@ class BRAIN_IM_EXPORT PeersModel : public QAbstractListModel
 public:
     explicit PeersModel(QObject *parent = nullptr);
 
-    virtual bool hasPeer(const Peer peer) const = 0;
-    virtual QString getName(const Peer peer) const = 0;
+    Q_INVOKABLE virtual bool hasPeer(const BrainIM::Peer peer) const = 0;
+    Q_INVOKABLE virtual QString getName(const BrainIM::Peer peer) const = 0;
 
 signals:
     void nameChanged(const Peer peer);

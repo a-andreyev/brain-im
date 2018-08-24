@@ -6,34 +6,14 @@ set(BRAIN_IM_BASE_ABI "0")
 message(STATUS "Found includes: " ${QT5_INCLUDES})
 
 set(base_sources
-    AccountsModel
-    AccountsModel.cpp
-    AccountsModel.hpp
-    AccountManager
-    AccountManager.cpp
-    AccountManager.hpp
-    AccountParameterModel
-    AccountParameterModel.cpp
-    AccountParameterModel.hpp
     Approver.cpp
     Approver.hpp
-    ConnectionManagersModel
-    ConnectionManagersModel.cpp
-    ConnectionManagersModel.hpp
     ContactsModel.cpp
     ContactsModel.hpp
-    Core.cpp
-    Core.hpp
-    DBusServiceHelper
-    DBusServiceHelper.cpp
-    DBusServiceHelper.hpp
     Entity.cpp
     Entity.hpp
     Event.cpp
     Event.hpp
-    ProtocolsModel
-    ProtocolsModel.cpp
-    ProtocolsModel.hpp
     PeersModel.cpp
     PeersModel.hpp
     MessagesModel.cpp
@@ -47,6 +27,33 @@ if (USE_TELEPATHY)
     set(tp_sources
         TelepathyMessagesModel.cpp
         TelepathyMessagesModel.hpp
+
+        AccountManager
+        AccountManager.cpp
+        AccountManager.hpp
+
+        AccountsModel
+        AccountsModel.cpp
+        AccountsModel.hpp
+
+        AccountParameterModel
+        AccountParameterModel.cpp
+        AccountParameterModel.hpp
+
+        ConnectionManagersModel
+        ConnectionManagersModel.cpp
+        ConnectionManagersModel.hpp
+
+        Core.cpp
+        Core.hpp
+
+        DBusServiceHelper
+        DBusServiceHelper.cpp
+        DBusServiceHelper.hpp
+
+        ProtocolsModel
+        ProtocolsModel.cpp
+        ProtocolsModel.hpp
     )
     list(APPEND base_sources
         ${tp_sources}
@@ -68,6 +75,7 @@ target_include_directories(BrainIM PRIVATE
 
 target_link_libraries(BrainIM
     Qt5::Core
+    Qt5::DBus
     Qt5::Gui
     Qt5::Network
     Qt5::Qml

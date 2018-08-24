@@ -19,6 +19,7 @@
 
 #include <QDateTime>
 #include <QDebug>
+#include <QTimer>
 
 namespace BrainIM
 {
@@ -92,7 +93,11 @@ int MessagesModel::rowCount(const QModelIndex &parent) const
 
 void MessagesModel::setContactsModel(ContactsModel *model)
 {
+    if (m_contactsModel == model) {
+        return;
+    }
     m_contactsModel = model;
+    emit contactsModelChanged(model);
 }
 
 QHash<int, QByteArray> MessagesModel::roleNames() const

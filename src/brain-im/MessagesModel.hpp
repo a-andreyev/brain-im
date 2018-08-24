@@ -173,6 +173,7 @@ class BRAIN_IM_EXPORT MessagesModel : public QAbstractTableModel
     Q_OBJECT
     Q_PROPERTY(Classes enabledClass NOTIFY classChanged)
     Q_PROPERTY(BrainIM::Peer peer READ peer WRITE setPeer NOTIFY peerChanged)
+    Q_PROPERTY(BrainIM::ContactsModel *contactsModel READ contactsModel WRITE setContactsModel NOTIFY contactsModelChanged)
 public:
     enum class Column {
         Peer,
@@ -215,7 +216,9 @@ public:
     Q_ENUM(Role)
 
     explicit MessagesModel(QObject *parent = nullptr);
-    void setContactsModel(ContactsModel *model);
+
+    ContactsModel *contactsModel() const { return m_contactsModel; }
+    void setContactsModel(BrainIM::ContactsModel *model);
 
     QHash<int, QByteArray> roleNames() const override;
 
@@ -247,6 +250,7 @@ public slots:
 signals:
     void classChanged();
     void peerChanged(Peer peer);
+    void contactsModelChanged(ContactsModel *model);
 
 protected:
     static Role intToRole(int value);

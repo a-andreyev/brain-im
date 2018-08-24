@@ -1,16 +1,22 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.3
-import BrainIM 0.1
-import BrainIM.Telepathy 0.1
 
-import "dialogs"
-import "messages"
+import BrainIM 0.1
+//import BrainIM.Telepathy 0.1
 
 Page {
     id: mainScreen
 
     property alias peer: messagesModel.peer
+
+    header: MessageToolbar {
+        id: chatToolbar
+        anchors.top: parent.top
+        width: rightColumn.width
+        height: 48
+        peerName: contactsModel.getName(mainScreen.peer)
+    }
 
     function showDialog(peer)
     {
@@ -37,17 +43,17 @@ Page {
             width: parent.width - dialogView.width
             height: parent.height
 
-            MessageToolbar {
-                id: chatToolbar
-                anchors.top: parent.top
-                width: rightColumn.width
-                height: 48
-                z: 1
-            }
+//            MessageToolbar {
+//                id: chatToolbar
+//                anchors.top: parent.top
+//                width: rightColumn.width
+//                height: 48
+//                z: 1
+//            }
             MessageView {
                 id: messageView
                 width: rightColumn.width
-                anchors.top: chatToolbar.bottom
+                anchors.top: rightColumn.top
                 anchors.bottom: messageEditor.top
                 model: messagesModel
                 onActivateDialog: mainScreen.showDialog(peer)
@@ -77,7 +83,12 @@ Page {
         id: contactsModel
     }
 
-    TelepathyMessagesModel {
+//    TelepathyMessagesModel {
+//        id: messagesModel
+//    }
+
+    MessagesModel {
         id: messagesModel
+        contactsModel: contactsModel
     }
 }

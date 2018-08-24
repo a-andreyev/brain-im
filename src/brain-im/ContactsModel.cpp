@@ -1,13 +1,9 @@
 #include "ContactsModel.hpp"
-#include "Core.hpp"
-
-#include <TelepathyQt/AccountManager>
-#include <TelepathyQt/ContactManager>
-#include <TelepathyQt/PendingReady>
 
 #include <QDateTime>
 
 #include <QDebug>
+#include <QTimer>
 
 namespace BrainIM {
 
@@ -16,8 +12,7 @@ static const int UserRoleOffset = Qt::UserRole + 1;
 ContactsModel::ContactsModel(QObject *parent) :
     PeersModel(parent)
 {
-    Tp::AccountManagerPtr manager = accountManager();
-    connect(manager->becomeReady(), &Tp::PendingOperation::finished, this, &ContactsModel::onAMReady);
+    QTimer::singleShot(200, this, &ContactsModel::populate);
 }
 
 QHash<int, QByteArray> ContactsModel::roleNames() const
@@ -55,6 +50,9 @@ int ContactsModel::rowCount(const QModelIndex &parent) const
 {
     if (parent.isValid()) {
         return 0;
+    }
+    if (!m_contacts.isEmpty()) {
+        return  m_contacts.count();
     }
     return m_contacts.count();
 }
@@ -107,30 +105,15 @@ QVariant ContactsModel::getData(int index, Role role) const
         return QVariant();
     }
 
-    Tp::ContactPtr contact = m_contacts.at(index);
+    Contact contact = m_contacts.at(index);
 
     switch (role) {
     case Role::Identifier:
-        return contact->id();
+        return contact.id();
     case Role::Alias:
-        return contact->alias();
+        return contact.alias();
     case Role::Peer:
-        return QVariant::fromValue(Peer(contact->id(), Peer::Type::Contact));
-    //    return m_contacts.at(contactIndex).id();
-    //case Phone:
-    //    return m_contacts.at(contactIndex).phone();
-    //case UserName:
-    //    return m_contacts.at(contactIndex).userName();
-    //case FullName:
-    //    return m_contacts.at(contactIndex).firstName() + QLatin1Char(' ') + m_contacts.at(contactIndex).lastName();
-    //case Status:
-    //    return contactStatusStr(m_contacts.at(contactIndex));
-    //case TypingStatus:
-    //    return m_contacts.at(contactIndex).typing;
-    //case Blocked:
-    //    return m_contacts.at(contactIndex).blocked;
-    //case Avatar:
-    //    return m_contacts.at(contactIndex).m_picture.pixmap;
+        return QVariant::fromValue(Peer(contact.id(), Peer::Type::Contact));
     default:
         return QVariant();
     }
@@ -203,6 +186,18 @@ void ContactsModel::clear()
     endResetModel();
 }
 
+void ContactsModel::populate()
+{
+    beginResetModel();
+    m_contacts.clear();
+    {
+        Contact c(QStringLiteral("daniel"));
+        c.setId(QStringLiteral("id1"));
+        m_contacts.append(c);
+    }
+    endResetModel();
+}
+
 void ContactsModel::onContactProfileChanged(quint32 id)
 {
 //    int index = indexOfContact(id);
@@ -227,53 +222,6 @@ void ContactsModel::onContactStatusChanged(quint32 id)
 //    m_backend->getUserInfo(&m_contacts[index], id);
 //    QModelIndex modelIndex = createIndex(index, Status);
     //    emit dataChanged(modelIndex, modelIndex);
-}
-
-void ContactsModel::onAMReady()
-{
-    Tp::AccountManagerPtr manager = accountManager();
-    if (!manager) {
-        qWarning() << Q_FUNC_INFO << "no account manager";
-        return;
-    }
-    QList<Tp::AccountPtr> accounts = manager->allAccounts();
-    if (accounts.isEmpty()) {
-        qWarning() << Q_FUNC_INFO << "no accounts";
-        return;
-    }
-    const int onlineIndex = [](const QList<Tp::AccountPtr> &accounts) {
-        for (int i = 0; i < accounts.count(); ++i) {
-            if (accounts.at(i).data()->isOnline()) {
-                return i;
-            }
-        }
-        return -1;
-    } (accounts);
-    if (onlineIndex < 0) {
-        qWarning() << Q_FUNC_INFO << "no online account";
-        return;
-    }
-
-    Tp::AccountPtr acc = accounts.at(onlineIndex);
-    Tp::ConnectionPtr conn = acc->connection();
-    if (!conn) {
-        qWarning() << Q_FUNC_INFO << "no account connection";
-        QTimer::singleShot(200, this, &ContactsModel::onAMReady);
-        return;
-    }
-    Tp::ContactManagerPtr connContacts = conn->contactManager();
-    if (!connContacts) {
-        qWarning() << Q_FUNC_INFO << "no account contact manager";
-        return;
-    }
-
-    beginResetModel();
-    const auto contacts = connContacts->allKnownContacts();
-    m_contacts.reserve(contacts.count());
-    for (const auto c : contacts) {
-        m_contacts.append(c);
-    }
-    endResetModel();
 }
 
 ContactsModel::Role ContactsModel::intToRole(int value)
@@ -359,16 +307,6 @@ bool ContactsModel::hasContact(quint32 contactId) const
     return false;
 }
 
-Tp::ContactPtr ContactsModel::contactAt(int index) const
-{
-    if ((index < 0) || (index >= m_contacts.count())) {
-        return Tp::ContactPtr();
-    }
-
-    qWarning() << Q_FUNC_INFO << "return" << index << m_contacts.at(index).data() << m_contacts.at(index).data()->alias();
-    return m_contacts.at(index);
-}
-
 //const SContact *ContactsModel::getContact(quint32 id) const
 //{
 //    int index = indexOfContact(id);
@@ -379,7 +317,7 @@ Tp::ContactPtr ContactsModel::contactAt(int index) const
 //    return contactAt(index);
 //}
 
-QVector<Tp::ContactPtr> ContactsModel::contacts() const
+QVector<Contact> ContactsModel::contacts() const
 {
     return m_contacts;
 }
@@ -403,7 +341,7 @@ int ContactsModel::indexOfPeer(const Peer peer) const
         return -1;
     }
     for (int i = 0; i < m_contacts.count(); ++i) {
-        if (m_contacts.at(i)->id() == peer.id) {
+        if (m_contacts.at(i).id() == peer.id) {
             return i;
         }
     }

@@ -12,11 +12,11 @@ set(BRAIN_IM_VERSION "${BRAIN_IM_VERSION_MAJOR}.${BRAIN_IM_VERSION_MINOR}.${BRAI
 option(ENABLE_TESTS "Enable compilation of automated tests" FALSE)
 # Add an option for dev build
 option(DEVELOPER_BUILD "Enable extra debug codepaths, like asserts and extra output" FALSE)
-# Add an option for dev build
-option(ENABLE_WIDGETS "Enable extra debug codepaths, like asserts and extra output" FALSE)
-option(ENABLE_QML "Enable extra debug codepaths, like asserts and extra output" TRUE)
 
-option(USE_TELEPATHY "Build with Telepathy support" TRUE)
+option(ENABLE_QML "Enable declarative plugin" FALSE)
+option(ENABLE_QML_CLIENT "Enable QML Client build" FALSE)
+
+option(USE_TELEPATHY "Build with Telepathy support" FALSE)
 
 find_package(Qt5 CONFIG REQUIRED COMPONENTS
     Core
@@ -46,13 +46,19 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -std=c++11 -Werror=return-type")
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
-add_subdirectory(base)
+add_subdirectory(src/brain-im)
 
 if (ENABLE_QML)
-    add_subdirectory(qml)
+    add_subdirectory(src/imports)
+endif()
+
+if (ENABLE_QML_CLIENT)
+    add_subdirectory(examples/qmlclient)
 endif()
 
 message(STATUS "BrainIM configuration:")
 message(STATUS "  Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "  Qt: ${Qt5_VERSION} at ${_qt5Core_install_prefix}")
-message(STATUS "  TelepathyQt: ${TELEPATHY_QT_VERSION} at ${TELEPATHY_QT_INSTALL_DIR}")
+if (USE_TELEPATHY)
+    message(STATUS "  TelepathyQt: ${TELEPATHY_QT_VERSION} at ${TELEPATHY_QT_INSTALL_DIR}")
+endif()

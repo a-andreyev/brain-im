@@ -68,7 +68,11 @@ void TelepathyMessagesModel::setPeerContact(Tp::ContactPtr contact)
 
     qWarning() << Q_FUNC_INFO << contact.data() << contact->alias();
 
+#if TP_QT_VERSION >= TP_QT_VERSION_CHECK(0, 9, 9)
     const QString accountId = contact->manager()->connection()->accountUniqueIdentifier();
+#else
+    const QString accountId = QStringLiteral("invalid");
+#endif
     qWarning() << Q_FUNC_INFO << "needed acc" << accountId;
 
     const auto accounts = BrainIM::accountManager()->allAccounts();
@@ -132,9 +136,10 @@ void TelepathyMessagesModel::onMessageReceived(const Tp::ReceivedMessage &messag
         MessageEvent *event = new BrainIM::MessageEvent();
         event->setPeer(Peer(message.sender()->id(), Peer::Type::Contact));
         event->text = message.text();
+#if TP_QT_VERSION >= TP_QT_VERSION_CHECK(0, 9, 9)
         event->receivedTimestamp = message.receivedTimestamp();
         event->sentTimestamp = message.sentTimestamp();
-
+#endif
         beginInsertRows(QModelIndex(), m_events.count(), m_events.count());
         m_events << event;
         endInsertRows();

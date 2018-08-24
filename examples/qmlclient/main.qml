@@ -4,10 +4,6 @@ import QtQuick.Controls 2.2
 import QtQuick.Controls.Material 2.0
 import QtQuick.Layouts 1.3
 
-import BrainIM 0.1
-import TelepathyQt 0.1
-
-import "components"
 import "pages"
 
 ApplicationWindow {
@@ -18,29 +14,30 @@ ApplicationWindow {
 
     title: "Brain IM"
 
-    property alias subtitle: subtitleLabel.text
+    //property alias subtitle: subtitleLabel.text
+    property string subtitle
 
     Material.theme: theme
 
     property int theme: Material.Light
 
-    header: ToolBar {
-        ToolButton {
-            text: qsTr("<")
-            onClicked: {
-                stackView.pop()
-            }
-            visible: stackView.depth > 1
-            anchors.left: parent.left
-        }
-        Label {
-            id: subtitleLabel
-            elide: Label.ElideRight
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-            text: stackView.currentItem.title
-        }
-    }
+//    header: ToolBar {
+//        ToolButton {
+//            text: qsTr("<")
+//            onClicked: {
+//                stackView.pop()
+//            }
+//            visible: stackView.depth > 1
+//            anchors.left: parent.left
+//        }
+//        Label {
+//            id: subtitleLabel
+//            elide: Label.ElideRight
+//            anchors.horizontalCenter: parent.horizontalCenter
+//            anchors.verticalCenter: parent.verticalCenter
+//            text: stackView.currentItem.title
+//        }
+//    }
 
     StackView {
         id: stackView

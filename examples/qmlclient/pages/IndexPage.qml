@@ -3,8 +3,6 @@ import QtQuick.Window 2.2
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 
-import TelepathyQt 0.1
-
 import "../components"
 
 ScrollablePage {

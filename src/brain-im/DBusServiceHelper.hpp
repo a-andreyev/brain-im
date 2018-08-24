@@ -1,8 +1,8 @@
-#pragma once
-
-#include <TelepathyQt/PendingOperation>
+#ifndef BRAIN_IM_DBUS_SERVICE_HELPER
+#define BRAIN_IM_DBUS_SERVICE_HELPER
 
 #include <QDBusConnection>
+#include <QDBusPendingCallWatcher>
 #include <QStringList>
 
 class DBusServiceHelper : public QObject
@@ -16,10 +16,10 @@ public:
     QStringList listNames();
     QStringList listActivatableNames();
 
-signals:
+Q_SIGNALS:
     void initialized();
 
-protected slots:
+protected Q_SLOTS:
     void onNameListReceived(QDBusPendingCallWatcher *callWatcher);
     void onActivatableNameListReceived(QDBusPendingCallWatcher *callWatcher);
 
@@ -29,3 +29,5 @@ protected:
     QStringList m_activatableNames;
     bool m_initialized;
 };
+
+#endif // BRAIN_IM_DBUS_SERVICE_HELPER

@@ -3,8 +3,11 @@
 
 #include "global.h"
 
+#ifdef USE_TELEPATHY
 #include <TelepathyQt/Constants>
 #include <TelepathyQt/Types>
+#endif
+
 #include <QList>
 #include <QDate>
 
@@ -58,10 +61,16 @@ class BRAIN_IM_EXPORT PeerEnums : public QObject
     Q_OBJECT
 public:
     enum Type {
+#ifdef USE_TELEPATHY
         Invalid = Tp::HandleTypeNone,
         Contact = Tp::HandleTypeContact,
         Room = Tp::HandleTypeRoom,
+#else
+        Invalid,
+        Contact,
+        Room ,
     };
+#endif
     Q_ENUM(Type)
 };
 
@@ -100,6 +109,26 @@ public:
     {
         return Peer(id, Type::Room);
     }
+};
+
+struct BRAIN_IM_EXPORT Contact
+{
+    Q_GADGET
+    Q_PROPERTY(QString alias READ alias)
+public:
+    explicit Contact(const QString &alias = QString()) :
+        m_alias(alias)
+    {
+    }
+
+    void setId(const QString &id) { m_id = id; }
+
+    QString alias() const { return m_alias; }
+    QString id() const { return m_id; }
+
+protected:
+    QString m_alias;
+    QString m_id;
 };
 
 class BRAIN_IM_EXPORT Brain : public QObject
