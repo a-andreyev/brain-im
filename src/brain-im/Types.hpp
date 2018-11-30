@@ -69,8 +69,8 @@ public:
         Invalid,
         Contact,
         Room ,
-    };
 #endif
+    };
     Q_ENUM(Type)
 };
 

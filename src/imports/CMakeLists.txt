@@ -13,6 +13,10 @@ endif()
 
 set(brain_qml_SOURCES plugin.cpp)
 
+if (USE_TELEPATHY)
+    add_definitions(-DUSE_TELEPATHY)
+endif()
+
 add_library(BrainIMQml SHARED ${brain_qml_SOURCES})
 
 target_include_directories(BrainIMQml PRIVATE
@@ -27,7 +31,6 @@ target_link_libraries(BrainIMQml
     Qt5::Network
     Qt5::Qml
     Qt5::Quick
-
     BrainIM
 )
 
@@ -35,13 +38,14 @@ set(qml_SOURCES
     AccountEditor.qml
     AccountView.qml
     ConnectionManagerView.qml
-    ProtocolView.qml
     DialogDelegate.qml
     DialogView.qml
     MessageDelegate.qml
     MessageEditor.qml
     MessageToolbar.qml
     MessageView.qml
+    ProtocolView.qml
+    ScrollablePage.qml
     ServiceMessageDelegate.qml
 )
 

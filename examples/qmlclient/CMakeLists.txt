@@ -9,7 +9,6 @@ endif()
 set(brain_qml_SOURCES
     main.cpp
     main.qml
-    components/ScrollablePage.qml
     pages/AccountManagement.qml
     pages/IndexPage.qml
     pages/MainView.qml
@@ -33,9 +32,9 @@ target_link_libraries(brain_im
     Qt5::Network
     Qt5::Qml
     Qt5::Quick
+    BrainIM
 
     ${TELEPATHY_QT_LIBRARIES}
-    BrainIM
 )
 
 if (NOT INSTALL_QML_IMPORT_DIR)

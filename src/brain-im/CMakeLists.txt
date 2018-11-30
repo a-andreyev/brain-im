@@ -1,4 +1,4 @@
-project(libBrainIM)
+project(BrainIM)
 set(BRAIN_IM_BASE_ABI "0")
 
 #find_package(Qt5 REQUIRED COMPONENTS Core)
