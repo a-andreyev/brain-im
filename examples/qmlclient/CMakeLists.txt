@@ -7,14 +7,13 @@ if (USE_TELEPATHY)
 endif()
 
 set(brain_qml_SOURCES
-    main.cpp
     main.qml
     pages/AccountManagement.qml
     pages/IndexPage.qml
     pages/MainView.qml
 )
 
-add_executable(brain_im ${brain_qml_SOURCES})
+add_executable(brain_im main.cpp ${brain_qml_SOURCES})
 
 set_target_properties(brain_im PROPERTIES AUTOMOC TRUE)
 
@@ -42,3 +41,8 @@ if (NOT INSTALL_QML_IMPORT_DIR)
 endif()
 
 set(QML_IMPORT_PATH ${INSTALL_QML_IMPORT_DIR})
+
+install(
+    FILES ${brain_qml_SOURCES}
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/brain-im/qml
+)

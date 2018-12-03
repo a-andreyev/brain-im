@@ -22,15 +22,15 @@
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
-    app.addLibraryPath(QStringLiteral("/home/user/prefix/telepathy/lib"));
+    //app.addLibraryPath(QStringLiteral("/home/user/prefix/telepathy/lib"));
 
     //Tp::registerTypes();
 
     BrainIM::CallEvent mod;
 
     QQmlApplicationEngine engine;
-    engine.addImportPath(QStringLiteral("/home/user/prefix/telepathy/lib/qt5/qml"));
-    engine.load(QUrl(QStringLiteral("main.qml")));
+    engine.addImportPath(QStringLiteral("/usr/share/brain-im/qml"));
+    engine.load(QUrl(QStringLiteral("/usr/share/brain-im/qml/main.qml")));
 
     return app.exec();
 }
